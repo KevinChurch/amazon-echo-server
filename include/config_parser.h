@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <boost/algorithm/string.hpp>
 
 class NginxConfig;
 
@@ -12,7 +13,7 @@ class NginxConfig;
 class NginxConfigStatement {
  public:
   std::string ToString(int depth);
-  // std::string Find(std::string key);
+  std::string Find(std::vector<std::string> vectorKey, std::string value);
   std::vector<std::string> tokens_;
   std::unique_ptr<NginxConfig> child_block_;
 };
@@ -21,7 +22,10 @@ class NginxConfigStatement {
 class NginxConfig {
  public:
   std::string ToString(int depth = 0);
-  // std::string Find(std::string key);
+  // Returns value of first matching key.
+  std::string Find(std::string key);
+  std::string Find(std::vector<std::string> vectorKey);
+  std::string Find(std::vector<std::string> vectorKey, std::string value);
   std::vector<std::shared_ptr<NginxConfigStatement>> statements_;
 };
 
