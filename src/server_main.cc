@@ -8,29 +8,28 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include "config_parser.h"
 #include "server.h"
 
 using boost::asio::ip::tcp;
 
 int main(int argc, char* argv[])
 {
-  try
-  {
-    if (argc != 2)
-    {
-      std::cerr << "Usage: async_tcp_echo_server <port>\n";
-      return 1;
-    }
+  try {
+    NginxConfigParser config_parser;
+    NginxConfig config;
+    config_parser.Parse(argv[1], &config);
+
+    unsigned short port = stoi(config.Find("server.listen"));
+
+    // printf("%s", config.ToString().c_str());
 
     boost::asio::io_service io_service;
-
-    using namespace std; // For atoi.
-    Server s(io_service, atoi(argv[1]));
+    
+    Server s(io_service, port);
 
     io_service.run();
-  }
-  catch (std::exception& e)
-  {
+  } catch (std::exception& e) {
     std::cerr << "Exception: " << e.what() << "\n";
   }
 

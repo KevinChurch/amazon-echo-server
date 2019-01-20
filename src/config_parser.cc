@@ -17,6 +17,13 @@
 
 #include "config_parser.h"
 
+void printV(std::vector<std::string> tokens_) {
+  for (const auto& token : tokens_) {
+    std::cout << token << ", ";
+  }
+  std::cout << std::endl;
+}
+
 std::string NginxConfig::ToString(int depth) {
   std::string serialized_config;
   for (const auto& statement : statements_) {
@@ -25,13 +32,52 @@ std::string NginxConfig::ToString(int depth) {
   return serialized_config;
 }
 
-// std::string NginxConfig::Find(std::string key) {
-//   std::string value;
-//   for (const auto& statement : statements_) {
-//     value = statement->Find(key);
-//   }
-//   return value;
-// }
+void printConfigs(NginxConfig *config) {
+  for (const auto& statement : config->statements_) {
+    for (const auto &token : statement->tokens_) {
+      std::cout << (&token - &statement->tokens_[0]) << ": " << token << std::endl;
+    }
+    if (statement->child_block_.get() != nullptr) {
+      printConfigs(statement->child_block_.get());
+    }
+  }
+}
+
+std::string NginxConfig::Find(std::string key) {
+  std::vector<std::string> vectorKey;
+  boost::split(vectorKey, key, boost::is_any_of("."));
+  return Find(vectorKey);
+}
+
+std::string NginxConfig::Find(std::vector<std::string> vectorKey) {
+  std::string value;
+  return Find(vectorKey, value);
+}
+
+std::string NginxConfig::Find(std::vector<std::string> vectorKey, std::string value) {
+  for (const auto& statement : statements_) {
+    value = statement->Find(vectorKey, value);
+  }
+  return value;
+}
+
+std::string NginxConfigStatement::Find(std::vector<std::string> vectorKey, std::string value) {
+  std::string key = vectorKey.front();
+
+  if (!tokens_.empty()) {
+    if (tokens_[0] == key) {
+      if (vectorKey.size() == 1) {
+        value = tokens_[1];
+      } else {
+        std::vector<std::string> newVec(vectorKey.begin()+1, vectorKey.end());
+        value = Find(newVec, value);
+      }
+    } else if (child_block_.get() != nullptr) {
+      value = child_block_->Find(vectorKey, value);
+    }
+  }
+  return value;
+}
 
 std::string NginxConfigStatement::ToString(int depth) {
   std::string serialized_statement;
@@ -57,29 +103,6 @@ std::string NginxConfigStatement::ToString(int depth) {
   serialized_statement.append("\n");
   return serialized_statement;
 }
-
-// std::string NginxConfigStatement::Find(std::string key) {
-//   std::string value;
-//   std::string serialized_statement;
-//   for (unsigned int i = 0; i < tokens_.size(); ++i) {
-//     if (tokens_[i] == key) {
-//       value = 1;
-//     };
-//     serialized_statement.append(tokens_[i]);
-//   }
-//   if (child_block_.get() != nullptr) {
-//     serialized_statement.append(" {\n");
-//     serialized_statement.append(child_block_->ToString(1));
-//     for (int i = 0; i < 1; ++i) {
-//       serialized_statement.append("  ");
-//     }
-//     serialized_statement.append("}");
-//   } else {
-//     serialized_statement.append(";");
-//   }
-//   serialized_statement.append("\n");
-//   return serialized_statement;
-// }
 
 const char* NginxConfigParser::TokenTypeAsString(TokenType type) {
   switch (type) {
@@ -187,7 +210,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   while (true) {
     std::string token;
     token_type = ParseToken(config_file, &token);
-    printf ("%s: %s\n", TokenTypeAsString(token_type), token.c_str());
+    // printf ("%s: %s\n", TokenTypeAsString(token_type), token.c_str());
     if (token_type == TOKEN_TYPE_ERROR) {
       break;
     }
