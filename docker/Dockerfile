@@ -21,7 +21,7 @@ COPY --from=builder /usr/src/project/build/bin/server .
 COPY --from=builder /usr/src/project/example_config .
 
 # TODO(!): Expose some port(s)
-EXPOSE 8080
+EXPOSE 80
 
 # Use ENTRYPOINT to specify the binary name
 # TODO(!): Update with real server name

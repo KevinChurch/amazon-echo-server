@@ -4,23 +4,23 @@ steps:
   args:
   - '-c'
   - |
-    docker pull gcr.io/$PROJECT_ID/amazon-echo-server:base || exit 0
+    docker pull gcr.io/amazon-228918/amazon-echo-server:base || exit 0
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'build',
     '-f', 'docker/base.Dockerfile',
     '-t', 'amazon-echo-server:base',
-    '-t', 'gcr.io/$PROJECT_ID/amazon-echo-server:base',
-    '--cache-from', 'gcr.io/$PROJECT_ID/amazon-echo-server:base',
+    '-t', 'gcr.io/amazon-228918/amazon-echo-server:base',
+    '--cache-from', 'gcr.io/amazon-228918/amazon-echo-server:base',
     '.'
   ]
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/amazon-echo-server:base']
+  args: ['push', 'gcr.io/amazon-228918/amazon-echo-server:base']
 - name: 'gcr.io/cloud-builders/docker'
   args: [
     'build',
     '-f', 'docker/Dockerfile',
-    '-t', 'gcr.io/$PROJECT_ID/amazon-echo-server:latest',
+    '-t', 'gcr.io/amazon-228918/amazon-echo-server:latest',
     '.'
   ]
-images: ['gcr.io/$PROJECT_ID/amazon-echo-server:base', 'gcr.io/$PROJECT_ID/amazon-echo-server:latest']
+images: ['gcr.io/amazon-228918/amazon-echo-server:base', 'gcr.io/amazon-228918/amazon-echo-server:latest']
