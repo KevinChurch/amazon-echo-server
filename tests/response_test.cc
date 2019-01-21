@@ -36,3 +36,18 @@ TEST_F(ResponseTest, Body) {
 
   EXPECT_EQ(resp.body(), "This is my\nbody");
 }
+
+TEST_F(ResponseTest, ToString) {
+  resp = Response();
+  resp.SetStatus(200);
+  resp.SetHeader("Content-Type", "text/plain");
+  resp.SetBody("This is my\nbody");
+  
+  std::string expected = "HTTP/1.1 200 OK\r\n";
+  expected += "Content-Type: text/plain\r\n";
+  expected += "\r\n";
+  expected += "This is my\nbody";
+
+  EXPECT_EQ(resp.ToString(), expected);
+}
+
