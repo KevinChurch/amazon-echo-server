@@ -45,7 +45,7 @@ std::string Response::ToString(void) const{
     s += "OK";
   }
 
-  s += "\n";
+  s += "\r\n";
 
   //Add Headers
   for (auto it = (this->m_headers).begin();
@@ -53,8 +53,10 @@ std::string Response::ToString(void) const{
     s += it->first;
     s += ": ";
     s += it->second;
-    s += "\n";
+    s += "\r\n";
   }
+
+  s += "\r\n";
 
   //Add body
   s += this->body();
