@@ -1,6 +1,6 @@
 #include "session.h"
 #include "request.h"
-//#include "response.h"
+#include "response.h"
 
 #include <termios.h>
 #include <unistd.h>
@@ -36,21 +36,22 @@ void Session::handle_write(const boost::system::error_code& error) {
 }
 
 void Session::start() {
-    socket_.async_read_some(boost::asio::buffer(data_, max_length),
-        boost::bind(&Session::handle_read, this,
-            boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred));
+//    socket_.async_read_some(boost::asio::buffer(data_, max_length),
+//        boost::bind(&Session::handle_read, this,
+//            boost::asio::placeholders::error,
+//            boost::asio::placeholders::bytes_transferred));
+boost::asio::async_read_until(socket_, buffer, "\r\n\r\n",
+      boost::bind(&Session::handle_request, this));
 }
 
 int Session::handle_request(){
 
   auto request = Request::ParseRequest(get_message_request());
-// TODO create response
-
-  //response.SetStatus(200);
-  //response.SetHeader("Content-Type", "text/plain");
-  //response.SetBody(request->original_request());
-  //write_string(response.ToString());
+  Response response = Response();
+  response.SetStatus(200);
+  response.SetHeader("Content-Type", "text/plain");
+  response.SetBody(request->original_request());
+  write_string(response.ToString());
   return 0;
 }
 
