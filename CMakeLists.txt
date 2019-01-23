@@ -59,4 +59,4 @@ gtest_discover_tests(response_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 # include(cmake/CodeCoverageReportConfig.cmake)
 # generate_coverage_report(TARGETS example_server example_lib TESTS example_lib_test)
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS server config_farser_lib response_lib TESTS config_parser_test response_test)
+generate_coverage_report(TARGETS server config_parser_lib response_lib TESTS config_parser_test response_test)
