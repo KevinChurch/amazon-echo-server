@@ -37,6 +37,7 @@ include_directories(include)
 # TODO(!): Update name and srcs
 add_library(config_parser_lib src/config_parser.cc)
 add_library(response_lib src/response.cc)
+add_library(request_lib src/request.cc)
 
 # TODO(!): Update executable name, srcs, and deps
 # add_executable(example_server src/example_server_main.cc)
@@ -51,12 +52,16 @@ target_link_libraries(config_parser_test config_parser_lib gtest_main)
 add_executable(response_test tests/response_test.cc)
 target_link_libraries(response_test response_lib gtest_main)
 
+add_executable(request_test tests/request_test.cc)
+target_link_libraries(request_test request_lib gtest_main)
+
 # TODO(!): Update with test binary
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(response_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(request_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 # TODO(!): Update with target/test targets
 # include(cmake/CodeCoverageReportConfig.cmake)
 # generate_coverage_report(TARGETS example_server example_lib TESTS example_lib_test)
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS server config_parser_lib response_lib TESTS config_parser_test response_test)
+generate_coverage_report(TARGETS server config_parser_lib request_lib response_lib TESTS config_parser_test request_test response_test)
