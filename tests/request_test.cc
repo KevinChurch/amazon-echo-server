@@ -18,11 +18,11 @@ class RequestTest:public::testing::Test{
 };
 
 
-TEST_F(RequestTest, CheckOriginal_request){
+TEST_F(RequestTest, CheckOriginalRequest){
 	EXPECT_EQ(request->original_request(),"GET / HTTP/1.1\r\n\r\n");
 }
 
-TEST_F(RequestTest, CheckInvalidOriginal_request){
+TEST_F(RequestTest, CheckInvalidOriginalRequest){
 	EXPECT_NE(invalidrequest->original_request(),"GET / HTTP/1.1\r\n\r\n");
 }
 
