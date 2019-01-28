@@ -7,6 +7,8 @@
 
 CWD="$(pwd)" 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+BUILD="../build"
+BUILD_COVERAGE="../build_coverage"
 
 goto() {
     cd "$1"
@@ -14,8 +16,15 @@ goto() {
 
 run_server() {
     goto "$DIR"
-    echo "../build/bin/server ../dev_config &"
-    ../build/bin/server ../dev_config &
+    if [ -d "$BUILD" ]; then
+        echo "../build/bin/server ../dev_config &"
+        ../build/bin/server ../dev_config &
+    elif [ -d "$BUILD_COVERAGE" ]; then
+        echo "../build_coverage/bin/server ../dev_config &"
+        ../build_coverage/bin/server ../dev_config &
+    else
+        exit 1
+    fi
     SERVER_PID=$!
     # TODO: Figure out how to make the rest of the script wait 
     # for the server to stat up instead of usign sleep. 
