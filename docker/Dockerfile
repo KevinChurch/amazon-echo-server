@@ -9,7 +9,7 @@ WORKDIR /usr/src/project/build
 # Build and test
 RUN cmake ..
 RUN make
-RUN ctest --output-on_failure
+RUN ctest --output-on_failure -VV
 
 
 ### Deploy container ###
@@ -19,6 +19,7 @@ FROM ubuntu:latest as deploy
 # TODO(!): Copy server output binary to "."
 COPY --from=builder /usr/src/project/build/bin/server .
 COPY --from=builder /usr/src/project/example_config .
+COPY --from=builder /usr/src/project/dev_config .
 
 # TODO(!): Expose some port(s)
 EXPOSE 80

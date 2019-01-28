@@ -65,3 +65,5 @@ gtest_discover_tests(request_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
 # generate_coverage_report(TARGETS example_server example_lib TESTS example_lib_test)
 include(cmake/CodeCoverageReportConfig.cmake)
 generate_coverage_report(TARGETS server config_parser_lib request_lib response_lib TESTS config_parser_test request_test response_test)
+
+add_test(NAME INTEGRATION_TEST COMMAND integration_test.sh WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
