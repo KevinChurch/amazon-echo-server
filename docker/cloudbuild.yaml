@@ -23,4 +23,11 @@ steps:
     '-t', 'gcr.io/amazon-228918/amazon-echo-server:latest',
     '.'
   ]
-images: ['gcr.io/amazon-228918/amazon-echo-server:base', 'gcr.io/amazon-228918/amazon-echo-server:latest']
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'build',
+    '-f', 'docker/coverage.Dockerfile',
+    '-t', 'gcr.io/amazon-228918/amazon-echo-server:coverage',
+    '.'
+  ]
+images: ['gcr.io/amazon-228918/amazon-echo-server:base', 'gcr.io/amazon-228918/amazon-echo-server:latest', 'gcr.io/amazon-228918/amazon-echo-server:coverage']
