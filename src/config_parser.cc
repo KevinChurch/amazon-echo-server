@@ -17,30 +17,12 @@
 
 #include "config_parser.h"
 
-void printV(std::vector<std::string> tokens_) {
-  for (const auto& token : tokens_) {
-    std::cout << token << ", ";
-  }
-  std::cout << std::endl;
-}
-
 std::string NginxConfig::ToString(int depth) {
   std::string serialized_config;
   for (const auto& statement : statements_) {
     serialized_config.append(statement->ToString(depth));
   }
   return serialized_config;
-}
-
-void printConfigs(NginxConfig *config) {
-  for (const auto& statement : config->statements_) {
-    for (const auto &token : statement->tokens_) {
-      std::cout << (&token - &statement->tokens_[0]) << ": " << token << std::endl;
-    }
-    if (statement->child_block_.get() != nullptr) {
-      printConfigs(statement->child_block_.get());
-    }
-  }
 }
 
 std::string NginxConfig::Find(std::string key) {
