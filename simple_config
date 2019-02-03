@@ -1,0 +1,9 @@
+port 8080;
+
+path /echo EchoHandler;
+
+path /static StaticHandler {
+ root ./www_folder;
+ }
+
+default NotFoundHandler;
