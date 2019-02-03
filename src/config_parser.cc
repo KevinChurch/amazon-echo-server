@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "config_parser.h"
+#include "config_parser_exception.h"
 
 std::string NginxConfig::ToString(int depth) {
   std::string serialized_config;
@@ -264,6 +265,8 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   printf ("Bad transition from %s to %s\n",
           TokenTypeAsString(last_token_type),
           TokenTypeAsString(token_type));
+
+  throw ConfigParserException();
   return false;
 }
 

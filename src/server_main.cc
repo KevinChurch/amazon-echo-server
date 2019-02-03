@@ -10,6 +10,7 @@
 
 #include "config_parser.h"
 #include "server.h"
+#include "config_parser_exception.h"
 
 using boost::asio::ip::tcp;
 
@@ -32,7 +33,10 @@ int main(int argc, char* argv[])
     Server s(io_service, port);
 
     io_service.run();
-  } catch (std::exception& e) {
+  }catch (ConfigParserException& e) {
+    std::cerr << "Exception: " << e.what() << "\n";
+    exit(1);
+  }catch (std::exception& e) {
     std::cerr << "Exception: " << e.what() << "\n";
   }
 

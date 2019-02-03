@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "config_parser.h"
+#include "config_parser_exception.h"
 
 class NginxConfigParserTest : public ::testing::Test {
 protected:
@@ -93,49 +94,41 @@ TEST_F(NginxConfigParserTest, Find) {
 
 TEST_F(NginxConfigParserTest, InvalidConfigStreamMissingSemicolon) {
   std::stringstream config_file_stream("key value");
-  success = parser.Parse(&config_file_stream, &out_config);
 
-  EXPECT_FALSE(success);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
 }
 
 TEST_F(NginxConfigParserTest, InvalidConfigStreamSemicolon) {
   std::stringstream config_file_stream("server {};");
-  success = parser.Parse(&config_file_stream, &out_config);
 
-  EXPECT_FALSE(success);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
 }
 
 TEST_F(NginxConfigParserTest, InvalidConfigStreamSingleQuote) {
   std::stringstream config_file_stream("key 'value;");
-  success = parser.Parse(&config_file_stream, &out_config);
 
-  EXPECT_FALSE(success);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
 }
 
 TEST_F(NginxConfigParserTest, InvalidConfigStreamDoubleQuote) {
   std::stringstream config_file_stream("key \"value;");
-  success = parser.Parse(&config_file_stream, &out_config);
 
-  EXPECT_FALSE(success);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
 }
 
 TEST_F(NginxConfigParserTest, InvalidConfigStreamBlocks) {
   std::stringstream config_file_stream("server {");
-  success = parser.Parse(&config_file_stream, &out_config);
-  
-  EXPECT_FALSE(success);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
 
   config_file_stream.clear();
   config_file_stream.str("server {{}}");
-  success = parser.Parse(&config_file_stream, &out_config);
   
-  EXPECT_FALSE(success);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
   
   config_file_stream.clear();
   config_file_stream.str("server }");
-  success = parser.Parse(&config_file_stream, &out_config);
 
-  EXPECT_FALSE(success);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
 
   config_file_stream.clear();
   config_file_stream.str("\
@@ -143,9 +136,8 @@ http {\n\
   server {\n\
     listen   80;\n\
 }");
-  success = parser.Parse(&config_file_stream, &out_config);
 
-  EXPECT_FALSE(success);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
 }
 
 TEST_F(NginxConfigParserTest, ValidConfigStreamEmpty) {

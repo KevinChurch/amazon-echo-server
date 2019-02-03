@@ -26,7 +26,7 @@ message(STATUS "Boost version: ${Boost_VERSION}")
 
 include_directories(include)
 
-add_library(config_parser_lib src/config_parser.cc)
+add_library(config_parser_lib src/config_parser.cc src/config_parser_exception.cc)
 add_library(server_lib src/server.cc)
 add_library(response_lib src/response.cc)
 add_library(request_lib src/request.cc)
