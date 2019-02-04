@@ -8,7 +8,7 @@
 class Handler{
  public:
   Handler* GetHandlerByType(const char* type);
-  virtual bool Init(const std::string& uri_prefix, const NginxConfig& config) = 0;
+  virtual bool Init(const NginxConfig& config) = 0;
   virtual bool HandleRequest(const Request& request, Response* response) = 0;
 };
 
@@ -16,7 +16,7 @@ class Handler{
 class EchoHandler : public Handler {
 public:
   EchoHandler() {}
-  bool Init(const std::string& uri_prefix, const NginxConfig& config);
+  bool Init(const NginxConfig& config);
   bool HandleRequest(const Request& request, Response* response);
 
 private:
@@ -26,21 +26,21 @@ private:
 class StaticHandler: public Handler {
 public:
   StaticHandler() {}
-  bool Init(const std::string& uri_prefix, const NginxConfig& config);
+  bool Init(const NginxConfig& config);
   bool HandleRequest(const Request& request, Response* response);
 
 private:
   std::string uri_prefix;
-  std::string path;
-  std::string get_path_from_url(std::string url);
-  bool file_exists(const char *path);
-  std::string get_content_type(std::string file);
-  std::string read_file(std::string file);
+  std::string path_prefix;
+  std::string GetPath(std::string url);
+  bool RegularFile(std::string path);
+  std::string GetContentType(std::string file_name);
+  std::string GetContent(std::ifstream& file);
 };
 
 class NotFoundHandler : public Handler {
 public:
   NotFoundHandler() {}
-  bool Init(const std::string& uri_prefix, const NginxConfig& config);
+  bool Init(const NginxConfig& config);
   bool HandleRequest(const Request& request, Response* response);
 };

@@ -9,6 +9,8 @@ Server::Server(boost::asio::io_service& io_service, unsigned short port, const N
   //TODO: Use appropriate Nginx Parser functions
   boost::shared_ptr<EchoHandler> echo_ptr(new EchoHandler);
   boost::shared_ptr<StaticHandler> static_ptr(new StaticHandler);
+  echo_ptr->Init(config);
+  static_ptr->Init(config);
   handler_map_["/echo"] = echo_ptr;
   handler_map_["/static"] = static_ptr;
   start_accept();

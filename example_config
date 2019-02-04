@@ -1,3 +1,12 @@
-server {
-  listen   80;
+server{
+  listen 80;
+
+  EchoHandler{
+    location /echo;
+  } 
+
+  StaticHandler{
+    location /static;
+    root ./static;
+  }
 }

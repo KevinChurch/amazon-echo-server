@@ -42,7 +42,7 @@ boost::asio::async_read_until(socket_, buffer, "\r\n\r\n",
 }
 
 int Session::handle_request(){
-
+  Response response = Response();
   auto request = Request::ParseRequest(get_message_request());
 
   std::string longest_prefix = get_longest_prefix(request->uri());
@@ -51,7 +51,6 @@ int Session::handle_request(){
     handler_ptr.reset(new NotFoundHandler);
   }
 
-  Response response = Response();
   bool success = handler_ptr->HandleRequest(*request, &response);
 
   //If failure, use NotFound Handler
