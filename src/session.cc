@@ -9,8 +9,9 @@
 #include <fstream>
 #include <memory>
 
-Session::Session(boost::asio::io_service& io_service)
-    : socket_(io_service) { }
+Session::Session(boost::asio::io_service& io_service, 
+  std::map <std::string, boost::shared_ptr<Handler>> handler_map)
+    : socket_(io_service), handler_map(handler_map) { }
 
 void Session::handle_read(const boost::system::error_code& error,
     size_t bytes_transferred) {
@@ -36,10 +37,6 @@ void Session::handle_write(const boost::system::error_code& error) {
 }
 
 void Session::start() {
-//    socket_.async_read_some(boost::asio::buffer(data_, max_length),
-//        boost::bind(&Session::handle_read, this,
-//            boost::asio::placeholders::error,
-//            boost::asio::placeholders::bytes_transferred));
 boost::asio::async_read_until(socket_, buffer, "\r\n\r\n",
       boost::bind(&Session::handle_request, this));
 }
@@ -47,11 +44,25 @@ boost::asio::async_read_until(socket_, buffer, "\r\n\r\n",
 int Session::handle_request(){
 
   auto request = Request::ParseRequest(get_message_request());
+
+  std::string longest_prefix = get_longest_prefix(request->uri());
+  boost::shared_ptr<Handler> handler_ptr = handler_map[longest_prefix];
+  if (!handler_ptr){
+    handler_ptr.reset(new NotFoundHandler);
+  }
+
   Response response = Response();
-  response.SetStatus(200);
-  response.SetHeader("Content-Type", "text/plain");
-  response.SetBody(request->original_request());
+  bool success = handler_ptr->HandleRequest(*request, &response);
+
+  //If failure, use NotFound Handler
+  if(!success){
+    handler_ptr.reset(new NotFoundHandler);
+    handler_ptr->HandleRequest(*request, &response);
+  }
+
   write_string(response.ToString());
+
+
   return 0;
 }
 
@@ -82,4 +93,21 @@ std::string Session::get_message_request()
   };
 
   return msg;
+}
+
+
+std::string Session::get_longest_prefix(const std::string original_url)
+{
+  unsigned int longest_match_size = 0;
+  std::string longest_match = "";
+
+  for (auto const& iter : handler_map){
+    if (original_url.find(iter.first) == 0){
+      if (iter.first.length() > longest_match_size){
+        longest_match = iter.first;
+        longest_match_size = iter.first.length();
+      }
+    }
+  }
+  return longest_match;
 }

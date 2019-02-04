@@ -26,11 +26,10 @@ int main(int argc, char* argv[])
     NginxConfig config;
     config_parser.Parse(argv[1], &config);
 
-    unsigned short port = stoi(config.Find("server.listen"));
-
     boost::asio::io_service io_service;
-    
-    Server s(io_service, port);
+
+    unsigned short port = stoi(config.Find("server.listen"));
+    Server s(io_service, port, config);
 
     io_service.run();
   }catch (ConfigParserException& e) {

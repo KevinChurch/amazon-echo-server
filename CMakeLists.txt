@@ -31,6 +31,7 @@ add_library(server_lib src/server.cc)
 add_library(response_lib src/response.cc)
 add_library(request_lib src/request.cc)
 add_library(session_lib src/session.cc)
+add_library(handler_lib src/handler.cc)
 
 add_executable(server src/server_main.cc src/session.cc)
 target_link_libraries(server
@@ -39,8 +40,9 @@ target_link_libraries(server
         server_lib
         request_lib
         response_lib
-        Boost::system
-        Boost::log_setup
+	handler_lib
+	Boost::system
+	Boost::log_setup
         Boost::log
 )
 

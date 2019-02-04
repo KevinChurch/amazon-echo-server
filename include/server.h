@@ -3,12 +3,14 @@
 
 #include <boost/asio.hpp>
 #include "session.h"
+#include "config_parser.h"
+#include <map>
 
 using boost::asio::ip::tcp;
 
 class Server {
 public:
-  Server(boost::asio::io_service& io_service, short port);
+  Server(boost::asio::io_service& io_service, unsigned short port, const NginxConfig config);
 
 private:
   void start_accept();
@@ -18,6 +20,7 @@ private:
 
   boost::asio::io_service& io_service_;
   tcp::acceptor acceptor_;
+  std::map <std::string, boost::shared_ptr<Handler>> handler_map_;
 };
 
 #endif
