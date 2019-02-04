@@ -1,7 +1,7 @@
 #include "session.h"
 #include "request.h"
 #include "response.h"
-#include "handler.h" 
+
 #include <termios.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -9,9 +9,8 @@
 #include <fstream>
 #include <memory>
 
-Session::Session(boost::asio::io_service& io_service, 
-  std::map <std::string, std::pair<std::string, std::shared_ptr<RequestHandler>>> handler_map)
-    : socket_(io_service), handler_map(handler_map) { }
+Session::Session(boost::asio::io_service& io_service)
+    : socket_(io_service) { }
 
 void Session::handle_read(const boost::system::error_code& error,
     size_t bytes_transferred) {
@@ -48,12 +47,6 @@ boost::asio::async_read_until(socket_, buffer, "\r\n\r\n",
 int Session::handle_request(){
 
   auto request = Request::ParseRequest(get_message_request());
-
-  std::string longest_prefix = get_longest_prefix(request->uri());
-  std::shared_ptr<RequestHandler> handler_ptr = handler_map[longest_prefix].second;
-
-
-
   Response response = Response();
   response.SetStatus(200);
   response.SetHeader("Content-Type", "text/plain");
@@ -89,21 +82,4 @@ std::string Session::get_message_request()
   };
 
   return msg;
-}
-
-
-std::string session::get_longest_prefix(const std::string original_url)
-{
-  unsigned int longest_match_size = 0;
-  std::string longest_match = "";
-
-  for (auto const& iter : handler_map){
-    if (original_url.find(iter.first) == 0){
-      if (iter.first.length() > longest_match_size){
-        longest_match = iter.first;
-        longest_match_size = iter.first.length();
-      }
-    }
-  }
-  return longest_match;
 }

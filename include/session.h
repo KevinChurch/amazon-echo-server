@@ -3,7 +3,6 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <map>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 
@@ -11,8 +10,7 @@ using boost::asio::ip::tcp;
 
 class Session {
 public:
-  Session(boost::asio::io_service& io_service, 
-    std::map <std::string, std::pair<std::string, std::shared_ptr<RequestHandler>>> handler_map);
+  Session(boost::asio::io_service& io_service);
 
   tcp::socket& socket() {
     return socket_;
@@ -31,7 +29,6 @@ private:
     void handle_write(const boost::system::error_code& error);
 
     std::string get_message_request();
-    std::string get_longest_prefix(const std::string original_url);
     boost::asio::streambuf buffer;
 
   tcp::socket socket_;
