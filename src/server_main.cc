@@ -11,16 +11,29 @@
 #include "config_parser.h"
 #include "server.h"
 #include "config_parser_exception.h"
+#include "logging.h"
 
 using boost::asio::ip::tcp;
+
+void handler( const boost::system::error_code& error , int signal_number )
+{
+  if (signal_number == 2) {
+    INFO << "Server has stoppped by user";
+  }
+
+  exit(1);
+}
 
 int main(int argc, char* argv[])
 {
   try {
     if (argc != 2) {
       std::cerr << "Usage: ./server <path to config file>\n";
+      ERROR << "Wrong number of arguments were provided by the user";
       return 1;
     }
+
+    INFO << "Server started running...";
 
     NginxConfigParser config_parser;
     NginxConfig config;
@@ -29,14 +42,26 @@ int main(int argc, char* argv[])
     boost::asio::io_service io_service;
 
     unsigned short port = stoi(config.Find("server.listen"));
+
+    INFO << "Successfully parsed a config file";
+    INFO << "Running the server on port " << port;
+
+    // Construct a signal set registered for process termination.
+    boost::asio::signal_set signals(io_service, SIGINT);
+    // Start an asynchronous wait for one of the signals to occur.
+    signals.async_wait(handler);
+
     Server s(io_service, port, config);
 
     io_service.run();
   }catch (ConfigParserException& e) {
     std::cerr << "Exception: " << e.what() << "\n";
+    ERROR << "Config parser exception: " << e.what();
     exit(1);
   }catch (std::exception& e) {
     std::cerr << "Exception: " << e.what() << "\n";
+    ERROR << "Exception: " << e.what();
+    exit(1);
   }
 
   return 0;

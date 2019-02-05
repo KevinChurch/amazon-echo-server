@@ -1,11 +1,12 @@
 #include "request.h"
+#include "logging.h"
 #include <vector>
 #include <iostream>
 
 //implementation for ParseRequest
 std::unique_ptr<Request> Request::ParseRequest(const std::string& original_request) {
 
-	
+
 	std::unique_ptr<Request> req(new Request);
 	req->m_original_request = original_request;
 	std::string method;
@@ -46,12 +47,14 @@ std::unique_ptr<Request> Request::ParseRequest(const std::string& original_reque
 	}
 
 	if (method != "GET") {
-			std::cerr << "Invalid method request!" << std::endl;
-			req->m_original_request = "";
+		std::cerr << "Invalid method request!" << std::endl;
+		ERROR << "Invalid method request!";
+		req->m_original_request = "";
 	}
 
 	if (version != "HTTP/1.1") {
 		std::cerr << "HTTP Version not support!" << std::endl;
+		ERROR << "HTTP Version not support!";
 		req->m_original_request = "";
 	}
 

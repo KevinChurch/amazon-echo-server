@@ -1,6 +1,7 @@
 #include "session.h"
 #include "request.h"
 #include "response.h"
+#include "logging.h"
 
 #include <termios.h>
 #include <unistd.h>
@@ -9,7 +10,7 @@
 #include <fstream>
 #include <memory>
 
-Session::Session(boost::asio::io_service& io_service, 
+Session::Session(boost::asio::io_service& io_service,
   std::map <std::string, boost::shared_ptr<Handler>> handler_map)
     : socket_(io_service), handler_map(handler_map) { }
 
@@ -44,6 +45,7 @@ boost::asio::async_read_until(socket_, buffer, "\r\n\r\n",
 int Session::handle_request(){
   Response response = Response();
   auto request = Request::ParseRequest(get_message_request());
+  std::string s = socket_.remote_endpoint().address().to_string();
 
   std::string longest_prefix = get_longest_prefix(request->uri());
   boost::shared_ptr<Handler> handler_ptr = handler_map[longest_prefix];
@@ -61,6 +63,12 @@ int Session::handle_request(){
 
   write_string(response.ToString());
 
+  std::string original_request_str = request->original_request();
+	while(!original_request_str.empty() && original_request_str[original_request_str.size() - 1] == '\n' || original_request_str[original_request_str.size() - 1] == '\r') {
+		original_request_str.erase(original_request_str.size() - 1);
+	}
+
+  INFO << s << " - - " << original_request_str << ' ' << response.status_code();
 
   return 0;
 }
@@ -75,7 +83,7 @@ void Session::write_string(std::string send) {
 
   boost::asio::write(socket_, out_streambuf);
 
- 
+
   boost::system::error_code ec;
   socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
   socket_.close();
