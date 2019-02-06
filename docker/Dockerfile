@@ -17,16 +17,17 @@ RUN ctest --output-on_failure -VV
 FROM ubuntu:latest as deploy
 
 # TODO(!): Copy server output binary to "."
-COPY --from=builder /usr/src/project/build/bin/server .
+COPY --from=builder /usr/src/project/build/bin/server ./build/bin/
 COPY --from=builder /usr/src/project/example_config .
 COPY --from=builder /usr/src/project/dev_config .
+COPY --from=builder /usr/src/project/static ./static
 
 # TODO(!): Expose some port(s)
 EXPOSE 80
 
 # Use ENTRYPOINT to specify the binary name
 # TODO(!): Update with real server name
-ENTRYPOINT ["./server"]
+ENTRYPOINT ["./build/bin/server"]
 
 # Use CMD to specify arguments to ENTRYPOINT
 # TODO(!): Update with real server args

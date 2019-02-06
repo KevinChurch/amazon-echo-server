@@ -6,10 +6,10 @@
 # and make this part of the deployment process.
 
 # GLOBAL VARIABLE
-CWD="$(pwd)" 
+CWD="$(pwd)"
 TEST_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-BUILD="../build"
-BUILD_COVERAGE="../build_coverage"
+BUILD="build"
+BUILD_COVERAGE="build_coverage"
 PASS=1
 
 # FUNCTIONS
@@ -22,11 +22,11 @@ goto() {
 # starts server
 run_server() {
     if [ -d "$BUILD" ]; then
-        echo "../build/bin/server ../dev_config &"
-        ../build/bin/server ../dev_config &
+        echo "build/bin/server dev_config &"
+        build/bin/server dev_config &
     elif [ -d "$BUILD_COVERAGE" ]; then
-        echo "../build_coverage/bin/server ../dev_config &"
-        ../build_coverage/bin/server ../dev_config &
+        echo "build_coverage/bin/server dev_config &"
+        build_coverage/bin/server dev_config &
     else
         exit 1
     fi
@@ -82,6 +82,7 @@ file_test() {
         echo "pass"
     else
         echo "fail"
+        PASS=0
     fi
     rm TEMP_FILE
 }
@@ -90,6 +91,7 @@ file_test() {
 # TESTS
 
 goto "$TEST_DIR"
+goto ".."
 
 run_server
 
@@ -112,20 +114,18 @@ OUTPUT=${OUTPUT%$'\n'} # Removes automatic newline added to end of variable.
 test_equal "$INPUT" "$OUTPUT"
 
 # HTML Handler
-# file_test "<HTML URL>" "<HTML PATH>"
+file_test "localhost:8080/static/index.html" "static/index.html"
 
 # Image Handler
-# file_test "<IMAGE URL>" "<IMAGE PATH>"
+file_test "localhost:8080/static/amazon.jpg" "static/amazon.jpg"
 
 # # TXT Handler
-# file_test "<TXT URL>" "<TXT PATH>"
+file_test "localhost:8080/static/amazon.txt" "static/amazon.txt"
 
 kill_server
 
-test_equal() {
-    if [ "$PASS" == 1 ]; then
-        exit 0
-    else
-        exit 1
-    fi
-}
+if [ "$PASS" == 1 ]; then
+    exit 0
+else
+    exit 1
+fi
