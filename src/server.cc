@@ -8,11 +8,18 @@ Server::Server(boost::asio::io_service& io_service, unsigned short port, const N
   //This is where the the server will set up its configuration
   //TODO: Use appropriate Nginx Parser functions
   boost::shared_ptr<EchoHandler> echo_ptr(new EchoHandler);
-  boost::shared_ptr<StaticHandler> static_ptr(new StaticHandler);
+  boost::shared_ptr<StaticHandler> static_ptr1(new StaticHandler);
+  boost::shared_ptr<StaticHandler> static_ptr2(new StaticHandler);
+  std::string echo_uri = config.Find("server.path1.location");
+  std::string static_uri1 = config.Find("server.path2.location");
+  std::string static_uri2 = config.Find("server.path3.location");
+
   echo_ptr->Init(config);
-  static_ptr->Init(config);
-  handler_map_["/echo"] = echo_ptr;
-  handler_map_["/static"] = static_ptr;
+  static_ptr1->Init(config, static_uri1);
+  static_ptr2->Init(config, static_uri2);
+  handler_map_[echo_uri] = echo_ptr;
+  handler_map_[static_uri1] = static_ptr1;
+  handler_map_[static_uri2] = static_ptr2;
   start_accept();
 }
       

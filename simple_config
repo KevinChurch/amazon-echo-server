@@ -1,12 +1,20 @@
 server{
   listen 8080;
 
-  EchoHandler{
+  path1{
     location /echo;
-  } 
+    handler EchoHandler;
+  }
 
-  StaticHandler{
+  path2{
     location /static;
     root ./static;
+    handler StaticHandler;
+  }
+
+  path3{
+    location /static2;
+    root ./www/data;
+    handler StaticHandler;
   }
 }

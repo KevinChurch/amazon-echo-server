@@ -27,6 +27,7 @@ class StaticHandler: public Handler {
 public:
   StaticHandler() {}
   bool Init(const NginxConfig& config);
+  bool Init(const NginxConfig& config, std::string uri_prefix);
   bool HandleRequest(const Request& request, Response* response);
 
 private:

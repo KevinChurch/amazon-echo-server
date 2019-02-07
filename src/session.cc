@@ -64,7 +64,9 @@ int Session::handle_request(){
   write_string(response.ToString());
 
   std::string original_request_str = request->original_request();
-	while(!original_request_str.empty() && original_request_str[original_request_str.size() - 1] == '\n' || original_request_str[original_request_str.size() - 1] == '\r') {
+	while(!original_request_str.empty()
+	      && original_request_str[original_request_str.size() - 1] == '\n'
+	      || original_request_str[original_request_str.size() - 1] == '\r') {
 		original_request_str.erase(original_request_str.size() - 1);
 	}
 

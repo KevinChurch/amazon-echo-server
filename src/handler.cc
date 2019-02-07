@@ -23,12 +23,21 @@ bool EchoHandler::HandleRequest(const Request& request, Response* response) {
 }
 
 
-
 bool StaticHandler::Init(const NginxConfig& config){
-  //TODO: use parser to get path and uri prefixes.
-  this->uri_prefix = "/static";
-  this->path_prefix = "./static";
+  return this->Init(config, "/static");
+}
 
+
+bool StaticHandler::Init(const NginxConfig& config, std::string uri_prefix){
+  this->uri_prefix = uri_prefix;
+  if (config.Find("server.path2.location") == uri_prefix)
+    this->path_prefix = config.Find("server.path2.root");
+  else if (config.Find("server.path3.location") == uri_prefix)
+    this->path_prefix = config.Find("server.path3.root");      
+  else{//failed to find matching root
+    this->path_prefix = "";
+    return false;
+  }
   return true;
 }
 

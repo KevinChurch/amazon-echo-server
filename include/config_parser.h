@@ -13,8 +13,8 @@ class NginxConfig;
 // The parsed representation of a single config statement.
 class NginxConfigStatement {
  public:
-  std::string ToString(int depth);
-  std::string Find(std::vector<std::string> vectorKey, std::string value);
+  std::string ToString (int depth) const;
+  std::string Find (std::vector<std::string> vectorKey, std::string value) const;
   std::vector<std::string> tokens_;
   std::unique_ptr<NginxConfig> child_block_;
 };
@@ -22,11 +22,11 @@ class NginxConfigStatement {
 // The parsed representation of the entire config.
 class NginxConfig {
  public:
-  std::string ToString(int depth = 0);
+  std::string ToString(int depth = 0) const;
   // Returns value of first matching key.
-  std::string Find(std::string key);
-  std::string Find(std::vector<std::string> vectorKey);
-  std::string Find(std::vector<std::string> vectorKey, std::string value);
+  std::string Find(std::string key) const;
+  std::string Find(std::vector<std::string> vectorKey) const;
+  std::string Find(std::vector<std::string> vectorKey, std::string value) const;
   std::vector<std::shared_ptr<NginxConfigStatement>> statements_;
 };
 

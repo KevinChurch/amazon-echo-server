@@ -18,7 +18,7 @@
 #include "config_parser.h"
 #include "config_parser_exception.h"
 
-std::string NginxConfig::ToString(int depth) {
+std::string NginxConfig::ToString(int depth) const {
   std::string serialized_config;
   for (const auto& statement : statements_) {
     serialized_config.append(statement->ToString(depth));
@@ -26,25 +26,25 @@ std::string NginxConfig::ToString(int depth) {
   return serialized_config;
 }
 
-std::string NginxConfig::Find(std::string key) {
+std::string NginxConfig::Find(std::string key) const {
   std::vector<std::string> vectorKey;
   boost::split(vectorKey, key, boost::is_any_of("."));
   return Find(vectorKey);
 }
 
-std::string NginxConfig::Find(std::vector<std::string> vectorKey) {
+std::string NginxConfig::Find(std::vector<std::string> vectorKey) const {
   std::string value;
   return Find(vectorKey, value);
 }
 
-std::string NginxConfig::Find(std::vector<std::string> vectorKey, std::string value) {
+std::string NginxConfig::Find(std::vector<std::string> vectorKey, std::string value) const {
   for (const auto& statement : statements_) {
     value = statement->Find(vectorKey, value);
   }
   return value;
 }
 
-std::string NginxConfigStatement::Find(std::vector<std::string> vectorKey, std::string value) {
+std::string NginxConfigStatement::Find(std::vector<std::string> vectorKey, std::string value) const {
   std::string key = vectorKey.front();
 
   if (!tokens_.empty()) {
@@ -62,7 +62,7 @@ std::string NginxConfigStatement::Find(std::vector<std::string> vectorKey, std::
   return value;
 }
 
-std::string NginxConfigStatement::ToString(int depth) {
+std::string NginxConfigStatement::ToString(int depth) const {
   std::string serialized_statement;
   for (int i = 0; i < depth; ++i) {
     serialized_statement.append("  ");

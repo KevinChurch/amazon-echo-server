@@ -21,7 +21,7 @@ COPY --from=builder /usr/src/project/build/bin/server ./build/bin/
 COPY --from=builder /usr/src/project/example_config .
 COPY --from=builder /usr/src/project/dev_config .
 COPY --from=builder /usr/src/project/static ./static
-
+COPY --from=builder /usr/src/project/www/data ./www/data
 # TODO(!): Expose some port(s)
 EXPOSE 80
 
