@@ -33,7 +33,7 @@ bool StaticHandler::Init(const NginxConfig& config, std::string uri_prefix){
   if (config.Find("server.path2.location") == uri_prefix)
     this->path_prefix = config.Find("server.path2.root");
   else if (config.Find("server.path3.location") == uri_prefix)
-    this->path_prefix = config.Find("server.path3.root");      
+    this->path_prefix = config.Find("server.path3.root");
   else{//failed to find matching root
     this->path_prefix = "";
     return false;
@@ -42,12 +42,12 @@ bool StaticHandler::Init(const NginxConfig& config, std::string uri_prefix){
 }
 
 bool StaticHandler::HandleRequest(const Request& request, Response* response){
-  std::cout << "\nEchoHandler::HandleRequest" << std::endl;
+  std::cout << "\nStaticHandler::HandleRequest" << std::endl;
 
   std::string file_path = GetPath(request.uri());
   std::ifstream file;
 
-  if(!RegularFile(file_path)){
+  if(!IsRegularFile(file_path)){
     std::cerr << "Error: Static File requested, but file is not regular" << std::endl;
     return false;
   }
@@ -74,7 +74,7 @@ std::string StaticHandler::GetPath(std::string url){
   return path;
 }
 
-bool StaticHandler::RegularFile(std::string path){
+bool StaticHandler::IsRegularFile(std::string path){
   //Check if requested path is a regular file
   struct stat path_stat;
 
@@ -96,7 +96,7 @@ std::string StaticHandler::GetContentType(std::string file_name){
   std::string type;
 
 
-  std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);  
+  std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
 
   if(!ext.compare(".bmp"))
     type = "image/bmp";
@@ -110,9 +110,9 @@ std::string StaticHandler::GetContentType(std::string file_name){
     type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
   else if(!ext.compare(".gif"))
     type = "image/gif";
-  else if(!ext.compare(".htm") || !ext.compare(".html")) 
+  else if(!ext.compare(".htm") || !ext.compare(".html"))
     type = "text/html";
-  else if(!ext.compare(".jpg") || !ext.compare(".jpeg")) 
+  else if(!ext.compare(".jpg") || !ext.compare(".jpeg"))
     type = "image/jpeg";
   else if(!ext.compare(".mp3"))
     type = "audio/mpeg";
@@ -150,9 +150,9 @@ std::string StaticHandler::GetContentType(std::string file_name){
     type = "application/zip";
   else
     type = "text/plain";
-  
+
   return type;
-  
+
 }
 
 std::string StaticHandler::GetContent(std::ifstream& file){
@@ -167,7 +167,7 @@ std::string StaticHandler::GetContent(std::ifstream& file){
 	     std::istreambuf_iterator<char>());
 
   file.close();
-  
+
   return content;
 }
 
