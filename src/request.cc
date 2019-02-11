@@ -24,9 +24,21 @@ std::unique_ptr<Request> Request::ParseRequest(const std::string& original_reque
 
 		  	if (i == 0){
 		    	req->m_original_request = "";
+		    	std::cerr << "400 BAD REQUEST!" << std::endl;
+				ERROR << "400 BAD REQUEST!";
+				method = "";
+				url = "";
+				version = "";
+				break;
 			}
 		  	if (original_request[i-1] == ' '){
 		    	req->m_original_request = "";
+		    	std::cerr << "400 BAD REQUEST!" << std::endl;
+				ERROR << "400 BAD REQUEST!";
+				method = "";
+				url = "";
+				version = "";
+				break;
 			}
 			count++;
 		    continue;
@@ -84,6 +96,7 @@ std::string Request::version() const {
 	return m_version;
 }
 
+/*	we are using headers and body in response.cc file, I will delete this comment later
 using Headers = std::vector<std::pair<std::string, std::string>>;
 Headers Request::headers() const {
 	return m_headers;
@@ -92,3 +105,4 @@ Headers Request::headers() const {
 std::string Request::body() const {
 	return m_body;
 }
+*/

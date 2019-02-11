@@ -1,5 +1,4 @@
-#ifndef HTTP_REQ
-#define HTTP_REQ
+#pragma once
 #include <string>
 #include <vector>
 #include <memory>
@@ -15,19 +14,20 @@ class Request
     std::string uri() const;
     std::string version() const;
 
-    using Headers = std::vector<std::pair<std::string, std::string>>;
-    Headers headers() const;
-    std::string body() const;
+    //we are using headers and body in response.cc file, I will delete this comment later
+    //using Headers = std::vector<std::pair<std::string, std::string>>;
+    //Headers headers() const;
+    //std::string body() const;
 
   private:
     std::string m_original_request;
     std::string m_method;
     std::string m_uri;
     std::string m_version;
-    std::string m_body;
-    Headers m_headers;
+    //std::string m_body;
+    //Headers m_headers;
 };
 
 
-#endif
+
 
