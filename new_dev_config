@@ -1,0 +1,40 @@
+# Non-documented server attributes can be called whatever you want. Like
+# “port” or “listen” etc.
+port 8080;
+
+# The server root must be called “root” and must be interpreted as an
+# absolute path.
+root /usr/src/projects/amazon-echo-server;  # Contents passed to handler manager config
+
+# format is “handler-major”. The keyword is “handler” and the name of
+# the handler follows. Multiple handlers of the same type are registered
+# in separate blocks all marked with the same handler name.
+# Note that the names used in the config need to be the same names used
+# in the handler registration process (HandlerManager) below.
+handler static { # inner block is the NginxConfig passed to the handler creation;
+                     # The outer block is not passed to the handler factory.
+    # “location” is a documented keyword -- this is where the server will
+    # home the handler in URL-space.
+    location /static;
+
+    # Other non-”location” attributes are per-handler. Some may not have any.
+    # The static file handler should use a "root" attribute to specify the
+    # file directory. This could be an absolute path, or could be a path
+    # relative to the server root.
+    root static;
+
+    # It is fine to have other server-specific per-handler attributes in
+    # the config block for that handler.
+    # log warn static1.log;
+}
+
+# Example: blue text is what is passed to the handler factory:
+# everything in the block after the handler declaration.
+handler static {
+    location /static2;
+    root static;
+}
+
+handler echo {
+    location /echo;
+}
