@@ -62,6 +62,45 @@ std::string NginxConfigStatement::Find(std::vector<std::string> vectorKey, std::
   return value;
 }
 
+std::vector<NginxConfig*> NginxConfig::FindBlocks(std::string key) const {
+  std::vector<std::string> vectorKey;
+  boost::split(vectorKey, key, boost::is_any_of("."));
+  return FindBlocks(vectorKey);
+}
+
+std::vector<NginxConfig*> NginxConfig::FindBlocks(std::vector<std::string> vectorKey) const {
+  std::vector<NginxConfig*> blocks;
+  return FindBlocks(vectorKey, blocks);
+}
+
+std::vector<NginxConfig*> NginxConfig::FindBlocks(std::vector<std::string> vectorKey, std::vector<NginxConfig*> blocks) const {
+  for (const auto& statement : statements_) {
+    blocks = statement->FindBlocks(vectorKey, blocks);
+  }
+  return blocks;
+}
+
+std::vector<NginxConfig*> NginxConfigStatement::FindBlocks(std::vector<std::string> vectorKey, std::vector<NginxConfig*> blocks) const {
+  std::string key = vectorKey.front();
+
+  if (!tokens_.empty()) {
+    if (tokens_[0] == key) {
+      if (vectorKey.size() == 1) {
+        NginxConfig *block = child_block_.get();
+        if (block != nullptr) {
+          blocks.push_back(block);
+        }
+      } else {
+        std::vector<std::string> newVec(vectorKey.begin()+1, vectorKey.end());
+        blocks = FindBlocks(newVec, blocks);
+      }
+    } else if (child_block_.get() != nullptr) {
+      blocks = child_block_->FindBlocks(vectorKey, blocks);
+    }
+  }
+  return blocks;
+}
+
 std::string NginxConfigStatement::ToString(int depth) const {
   std::string serialized_statement;
   for (int i = 0; i < depth; ++i) {
