@@ -2,6 +2,7 @@
 #include "request.h"
 #include "response.h"
 #include "logging.h"
+#include "not_found_handler.h"
 
 #include <termios.h>
 #include <unistd.h>

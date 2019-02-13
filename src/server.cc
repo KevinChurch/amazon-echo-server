@@ -1,5 +1,7 @@
 #include "config_parser.h"
 #include "server.h"
+#include "echo_handler.h"
+#include "static_handler.h"
 
 Server::Server(boost::asio::io_service& io_service, unsigned short port, const NginxConfig config)
   : io_service_(io_service),

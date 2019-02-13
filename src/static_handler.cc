@@ -1,27 +1,4 @@
-#include "handler.h"
-#include "response.h"
-#include "request.h"
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <sys/types.h>
-#include <sys/stat.h>
-
-
-bool EchoHandler::Init(const NginxConfig& config) {
-  return true;
-}
-
-bool EchoHandler::HandleRequest(const Request& request, Response* response) {
-    std::cout << "\nEchoHandler::HandleRequest" << std::endl;
-
-    response->SetStatus(200);
-    response->SetHeader("Content-Type", "text/plain");
-    response->SetBody(request.original_request());
-    return true;
-}
-
+#include "static_handler.h"
 
 bool StaticHandler::Init(const NginxConfig& config){
   return this->Init(config, "/static");
@@ -169,20 +146,4 @@ std::string StaticHandler::GetContent(std::ifstream& file){
   file.close();
 
   return content;
-}
-
-
-
-bool NotFoundHandler::Init(const NginxConfig& config) {
-    return true;
-}
-
-bool NotFoundHandler::HandleRequest(const Request& request, Response* response){
-    std::cout << "\nNotFoundHandler::HandleRequest" << std::endl;
-
-    std::string body = "404 NOT FOUND\r\n";
-    response->SetStatus(404);
-    response->SetHeader("Content-Type", "text/plain");
-    response->SetBody(body);
-    return true;
 }
