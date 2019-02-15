@@ -47,18 +47,15 @@ std::string NginxConfig::Find(std::vector<std::string> vectorKey, std::string va
 std::string NginxConfigStatement::Find(std::vector<std::string> vectorKey, std::string value) const {
   std::string key = vectorKey.front();
 
-  if (!tokens_.empty()) {
-    if (tokens_[0] == key) {
-      if (vectorKey.size() == 1) {
-        value = tokens_[1];
-      } else {
-        std::vector<std::string> newVec(vectorKey.begin()+1, vectorKey.end());
-        value = Find(newVec, value);
-      }
+  if (!tokens_.empty() && (tokens_[0] == key)) {
+    if (vectorKey.size() == 1) {
+      value = tokens_[1];
     } else if (child_block_.get() != nullptr) {
-      value = child_block_->Find(vectorKey, value);
+      std::vector<std::string> newVec(vectorKey.begin()+1, vectorKey.end());
+      value = child_block_->Find(newVec, value);
     }
   }
+  
   return value;
 }
 
@@ -232,7 +229,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
   while (true) {
     std::string token;
     token_type = ParseToken(config_file, &token);
-    // printf ("%s: %s\n", TokenTypeAsString(token_type), token.c_str());
+    printf ("%s: %s\n", TokenTypeAsString(token_type), token.c_str());
     if (token_type == TOKEN_TYPE_ERROR) {
       break;
     }

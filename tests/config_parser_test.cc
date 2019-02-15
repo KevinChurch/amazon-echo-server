@@ -15,12 +15,6 @@ TEST_F(NginxConfigParserTest, SimpleConfigFile) {
   EXPECT_TRUE(success);
 }
 
-TEST_F(NginxConfigParserTest, FullConfigFile) {
-  success = parser.Parse("example_full_config", &out_config);
-
-  EXPECT_TRUE(success);
-}
-
 TEST_F(NginxConfigParserTest, EmptyConfigFile) {
   success = parser.Parse("example_empty_config", &out_config);
 
@@ -37,18 +31,33 @@ TEST_F(NginxConfigParserTest, ToString) {
   parser.Parse("example_config", &out_config);
 
   EXPECT_EQ(out_config.ToString(0), "\
-foo \"bar\";\n\
-server {\n\
-  listen 80;\n\
-  server_name foo.com;\n\
-  root /home/ubuntu/sites/foo/;\n\
+port 80;\n\
+root /usr/src/projects/amazon-echo-server;\n\
+handler static {\n\
+  location /static;\n\
+  root static;\n\
+}\n\
+handler static {\n\
+  location /static2;\n\
+  root static;\n\
+}\n\
+handler echo {\n\
+  location /echo;\n\
 }\n");
+
   EXPECT_EQ(out_config.ToString(1), "\
-  foo \"bar\";\n\
-  server {\n\
-    listen 80;\n\
-    server_name foo.com;\n\
-    root /home/ubuntu/sites/foo/;\n\
+  port 80;\n\
+  root /usr/src/projects/amazon-echo-server;\n\
+  handler static {\n\
+    location /static;\n\
+    root static;\n\
+  }\n\
+  handler static {\n\
+    location /static2;\n\
+    root static;\n\
+  }\n\
+  handler echo {\n\
+    location /echo;\n\
   }\n");
 }
 
@@ -56,40 +65,32 @@ TEST_F(NginxConfigParserTest, Find) {
   parser.Parse("example_config", &out_config);
 
   // Find with String
-  EXPECT_EQ(out_config.Find("foo"), "\"bar\"");
-  EXPECT_EQ(out_config.Find("server.listen"), "80");
-  EXPECT_EQ(out_config.Find("server.server_name"), "foo.com");
-  EXPECT_EQ(out_config.Find("server.root"), "/home/ubuntu/sites/foo/");
-  EXPECT_EQ(out_config.Find("bad"), "");
-  EXPECT_EQ(out_config.Find("bad.bad"), "");
+  EXPECT_EQ(out_config.Find("port"), "80");
+  EXPECT_EQ(out_config.Find("root"), "/usr/src/projects/amazon-echo-server");
 
-  EXPECT_NE(out_config.Find("server.listen"), "");
+  EXPECT_NE(out_config.Find("port"), "");
+  EXPECT_NE(out_config.Find("root"), "");
 
   // Find with Vector
-  std::vector<std::string> vect1 = {"foo"};
-  EXPECT_EQ(out_config.Find(vect1), "\"bar\"");
-  std::vector<std::string> vect2 = {"server", "listen"};
-  EXPECT_EQ(out_config.Find(vect2), "80");
-  std::vector<std::string> vect3 = {"server", "server_name"};
-  EXPECT_EQ(out_config.Find(vect3), "foo.com");
-  std::vector<std::string> vect4 = {"server", "root"};
-  EXPECT_EQ(out_config.Find(vect4), "/home/ubuntu/sites/foo/");
-  std::vector<std::string> vect5 = {"bad"};
-  EXPECT_EQ(out_config.Find(vect5), "");
-  std::vector<std::string> vect6 = {"bad", "bad"};
-  EXPECT_EQ(out_config.Find(vect6), "");
+  std::vector<std::string> vect1 = {"port"};
+  EXPECT_EQ(out_config.Find(vect1), "80");
+  std::vector<std::string> vect2 = {"root"};
+  EXPECT_EQ(out_config.Find(vect2), "/usr/src/projects/amazon-echo-server");
+  std::vector<std::string> vect3 = {"bad"};
+  EXPECT_EQ(out_config.Find(vect3), "");
+  std::vector<std::string> vect4 = {"bad", "bad"};
+  EXPECT_EQ(out_config.Find(vect4), "");
 
+  EXPECT_NE(out_config.Find(vect1), "");
   EXPECT_NE(out_config.Find(vect2), "");
 
   // Find with Vector and Value
-  EXPECT_EQ(out_config.Find(vect1, "\"par\""), "\"bar\"");
-  EXPECT_EQ(out_config.Find(vect2, "90"), "80");
-  EXPECT_EQ(out_config.Find(vect3, "bar.com"), "foo.com");
-  EXPECT_EQ(out_config.Find(vect4, "/"), "/home/ubuntu/sites/foo/");
-  EXPECT_EQ(out_config.Find(vect5, "good"), "good");
-  EXPECT_EQ(out_config.Find(vect6, "good"), "good");
+  EXPECT_EQ(out_config.Find(vect1, "100"), "80");
+  EXPECT_EQ(out_config.Find(vect2, "/"), "/usr/src/projects/amazon-echo-server");
+  EXPECT_EQ(out_config.Find(vect3, "good"), "good");
+  EXPECT_EQ(out_config.Find(vect4, "good"), "good");
 
-  EXPECT_NE(out_config.Find(vect6, "good"), "");
+  EXPECT_NE(out_config.Find(vect4, "good"), "");
 }
 
 TEST_F(NginxConfigParserTest, InvalidConfigStreamMissingSemicolon) {
