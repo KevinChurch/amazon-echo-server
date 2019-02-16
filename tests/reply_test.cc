@@ -1,27 +1,27 @@
 #include "gtest/gtest.h"
-#include "response.h"
+#include "reply.h"
 
-class ResponseTest : public ::testing::Test {
+class ReplyTest : public ::testing::Test {
 protected:
-  Response resp;
+  Reply resp;
   bool success;
 };
 
-TEST_F(ResponseTest, HTTPVersion) {
-  resp = Response();
+TEST_F(ReplyTest, HTTPVersion) {
+  resp = Reply();
 
   EXPECT_EQ(resp.http_ver(), "HTTP/1.1");
 }
 
-TEST_F(ResponseTest, StatusCode) {
-  resp = Response();
+TEST_F(ReplyTest, StatusCode) {
+  resp = Reply();
   resp.SetStatus(200);
 
   EXPECT_EQ(resp.status_code(), 200);
 }
 
-TEST_F(ResponseTest, Header) {
-  resp = Response();
+TEST_F(ReplyTest, Header) {
+  resp = Reply();
   resp.SetHeader("Content-Type", "text/plain");
   resp.SetHeader("My-Header", "some/value");
 
@@ -30,15 +30,15 @@ TEST_F(ResponseTest, Header) {
   EXPECT_EQ((resp.headers())["My-Header"], "some/value");
 }
 
-TEST_F(ResponseTest, Body) {
-  resp = Response();
+TEST_F(ReplyTest, Body) {
+  resp = Reply();
   resp.SetBody("This is my\nbody");
 
   EXPECT_EQ(resp.body(), "This is my\nbody");
 }
 
-TEST_F(ResponseTest, ToString) {
-  resp = Response();
+TEST_F(ReplyTest, ToString) {
+  resp = Reply();
   resp.SetStatus(200);
   resp.SetHeader("Content-Type", "text/plain");
   resp.SetBody("This is my\nbody");

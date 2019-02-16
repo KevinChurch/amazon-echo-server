@@ -1,5 +1,5 @@
 #include "echo_handler.h"
-#include "response.h"
+#include "reply.h"
 #include "request.h"
 #include <iostream>
 #include <fstream>
@@ -12,11 +12,11 @@ EchoHandler* EchoHandler::create(const NginxConfig& config, const std::string& r
   return new EchoHandler;
 }
 
-bool EchoHandler::HandleRequest(const Request& request, Response* response) {
+bool EchoHandler::HandleRequest(const Request& request, Reply* reply) {
     std::cout << "\nEchoHandler::HandleRequest" << std::endl;
 
-    response->SetStatus(200);
-    response->SetHeader("Content-Type", "text/plain");
-    response->SetBody(request.original_request());
+    reply->SetStatus(200);
+    reply->SetHeader("Content-Type", "text/plain");
+    reply->SetBody(request.original_request());
     return true;
 }

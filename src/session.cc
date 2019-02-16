@@ -1,6 +1,6 @@
 #include "session.h"
 #include "request.h"
-#include "response.h"
+#include "reply.h"
 #include "logging.h"
 #include "not_found_handler.h"
 
@@ -44,7 +44,7 @@ boost::asio::async_read_until(socket_, buffer, "\r\n\r\n",
 }
 
 int Session::handle_request(){
-  Response response = Response();
+  Reply reply = Reply();
   auto request = Request::ParseRequest(get_message_request());
   std::string s = socket_.remote_endpoint().address().to_string();
 
@@ -54,15 +54,15 @@ int Session::handle_request(){
     handler_ptr.reset(new NotFoundHandler);
   }
 
-  bool success = handler_ptr->HandleRequest(*request, &response);
+  bool success = handler_ptr->HandleRequest(*request, &reply);
 
   //If failure, use NotFound Handler
   if(!success){
     handler_ptr.reset(new NotFoundHandler);
-    handler_ptr->HandleRequest(*request, &response);
+    handler_ptr->HandleRequest(*request, &reply);
   }
 
-  write_string(response.ToString());
+  write_string(reply.ToString());
 
   std::string original_request_str = request->original_request();
 	while(!original_request_str.empty()
@@ -71,7 +71,7 @@ int Session::handle_request(){
 		original_request_str.erase(original_request_str.size() - 1);
 	}
 
-  INFO << s << " - - " << original_request_str << ' ' << response.status_code();
+  INFO << s << " - - " << original_request_str << ' ' << reply.status_code();
 
   return 0;
 }

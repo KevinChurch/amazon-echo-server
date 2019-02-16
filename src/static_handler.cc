@@ -19,7 +19,7 @@ bool StaticHandler::Init(const NginxConfig& config, std::string uri_prefix){
   return true;
 }
 
-bool StaticHandler::HandleRequest(const Request& request, Response* response){
+bool StaticHandler::HandleRequest(const Request& request, Reply* reply){
   std::cout << "\nStaticHandler::HandleRequest" << std::endl;
 
   std::string file_path = GetPath(request.uri());
@@ -38,9 +38,9 @@ bool StaticHandler::HandleRequest(const Request& request, Response* response){
   }
 
   std::string file_content = GetContent(file);
-  response->SetStatus(200);
-  response->SetHeader("Content-Type", GetContentType(file_path));
-  response->SetBody(file_content);
+  reply->SetStatus(200);
+  reply->SetHeader("Content-Type", GetContentType(file_path));
+  reply->SetBody(file_content);
 
   return true;
 }

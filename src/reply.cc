@@ -1,38 +1,38 @@
-#include "response.h"
+#include "reply.h"
 
-Response::Response(void){
+Reply::Reply(void){
   m_http_ver = "HTTP/1.1";
 }
 
-void Response::SetStatus(int status){
+void Reply::SetStatus(int status){
   m_status_code = status;
 }
 
-void Response::SetHeader(std::string key, std::string value){
+void Reply::SetHeader(std::string key, std::string value){
   m_headers[key] = value;
 }
 
-void Response::SetBody(std::string body){
+void Reply::SetBody(std::string body){
   m_body = body;
 }
 
-int Response::status_code(void) const{
+int Reply::status_code(void) const{
   return m_status_code;
 }
 
-std::string Response::body(void) const{
+std::string Reply::body(void) const{
   return m_body;
 }
 
-std::map<std::string, std::string> Response::headers(void) const{
+std::map<std::string, std::string> Reply::headers(void) const{
   return m_headers;
 }
 
-std::string Response::http_ver(void) const{
+std::string Reply::http_ver(void) const{
   return m_http_ver;
 }
 
-std::string Response::ToString(void) const{
+std::string Reply::ToString(void) const{
   std::string s = "";
 
   s += this->http_ver();

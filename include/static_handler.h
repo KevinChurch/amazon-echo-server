@@ -5,7 +5,7 @@
 class StaticHandler: public Handler {
 public:
   static StaticHandler* create(const NginxConfig& config, const std::string& root_path);
-  bool HandleRequest(const Request& request, Response* response);
+  bool HandleRequest(const Request& request, Reply* reply);
 
 private:
   std::string uri_prefix;

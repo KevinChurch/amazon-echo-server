@@ -4,12 +4,12 @@ NotFoundHandler* NotFoundHandler::create(const NginxConfig& config, const std::s
     return new NotFoundHandler;
 }
 
-bool NotFoundHandler::HandleRequest(const Request& request, Response* response){
+bool NotFoundHandler::HandleRequest(const Request& request, Reply* reply){
     std::cout << "\nNotFoundHandler::HandleRequest" << std::endl;
 
     std::string body = "404 NOT FOUND\r\n";
-    response->SetStatus(404);
-    response->SetHeader("Content-Type", "text/plain");
-    response->SetBody(body);
+    reply->SetStatus(404);
+    reply->SetHeader("Content-Type", "text/plain");
+    reply->SetBody(body);
     return true;
 }

@@ -24,19 +24,19 @@
 // }
 
 // TEST_F(SessionTest, Start) {
-//     std::string response = sess->get_response();
-//     EXPECT_FALSE(response.empty());
-//     EXPECT_EQ(response.substr(0, 17), "HTTP/1.1 200 OK\r\n");
+//     std::string reply = sess->get_reply();
+//     EXPECT_FALSE(reply.empty());
+//     EXPECT_EQ(reply.substr(0, 17), "HTTP/1.1 200 OK\r\n");
 // }
 
 // TEST_F(SessionTest, HandleRequest) {
-//     std::string response = sess->get_response();
-//     EXPECT_FALSE(response.empty());
-//     EXPECT_EQ(response.substr(0, 17), "HTTP/1.1 200 OK\r\n");
+//     std::string reply = sess->get_reply();
+//     EXPECT_FALSE(reply.empty());
+//     EXPECT_EQ(reply.substr(0, 17), "HTTP/1.1 200 OK\r\n");
 // }
 
 // TEST_F(SessionTest, WriteString) {
-//     std::string response = sess->get_response();
-//     EXPECT_FALSE(response.empty());
-//     EXPECT_EQ(response.substr(0, 17), "HTTP/1.1 200 OK\r\n");
+//     std::string reply = sess->get_reply();
+//     EXPECT_FALSE(reply.empty());
+//     EXPECT_EQ(reply.substr(0, 17), "HTTP/1.1 200 OK\r\n");
 // }

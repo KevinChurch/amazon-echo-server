@@ -1,13 +1,11 @@
-#ifndef RESPONSE_DEFINED
-#define RESPONSE_DEFINED
+#pragma once
 
 #include <string>
 #include <map>
 
-
-class Response{
+class Reply {
  public:
-  Response(void);
+  Reply(void);
   void SetStatus(int);
   void SetHeader(std::string key, std::string value);
   void SetBody(std::string);
@@ -22,8 +20,4 @@ class Response{
   int m_status_code;
   std::map<std::string, std::string> m_headers;
   std::string m_body;
-
 };
-
-#endif
-
