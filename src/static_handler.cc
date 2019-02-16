@@ -1,9 +1,10 @@
 #include "static_handler.h"
 
-bool StaticHandler::Init(const NginxConfig& config){
-  return this->Init(config, "/static");
+StaticHandler* StaticHandler::create(const NginxConfig& config, const std::string& root_path) {
+  StaticHandler* handler = new StaticHandler;
+  handler->Init(config, "/static");
+  return handler;
 }
-
 
 bool StaticHandler::Init(const NginxConfig& config, std::string uri_prefix){
   this->uri_prefix = uri_prefix;
@@ -22,6 +23,7 @@ bool StaticHandler::HandleRequest(const Request& request, Response* response){
   std::cout << "\nStaticHandler::HandleRequest" << std::endl;
 
   std::string file_path = GetPath(request.uri());
+  std::cout << file_path << std::endl;
   std::ifstream file;
 
   if(!IsRegularFile(file_path)){

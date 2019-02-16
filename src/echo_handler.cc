@@ -8,8 +8,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-bool EchoHandler::Init(const NginxConfig& config) {
-  return true;
+EchoHandler* EchoHandler::create(const NginxConfig& config, const std::string& root_path) {
+  return new EchoHandler;
 }
 
 bool EchoHandler::HandleRequest(const Request& request, Response* response) {

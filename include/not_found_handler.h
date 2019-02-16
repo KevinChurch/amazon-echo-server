@@ -4,6 +4,6 @@
 
 class NotFoundHandler : public Handler {
 public:
-  bool Init(const NginxConfig& config);
+  static NotFoundHandler* create(const NginxConfig& config, const std::string& root_path);
   bool HandleRequest(const Request& request, Response* response);
 };

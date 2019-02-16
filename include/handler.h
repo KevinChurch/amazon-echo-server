@@ -13,8 +13,6 @@
 
 class Handler {
 public:
-  // virtual static Handler *make_handler(const NginxConfig& config) = 0;
-  Handler* GetHandlerByType(const char* type);
-  virtual bool Init(const NginxConfig& config) = 0;
+  static Handler* create(const NginxConfig& config, const std::string& root_path);
   virtual bool HandleRequest(const Request& request, Response* response) = 0;
 };

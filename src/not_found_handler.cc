@@ -1,7 +1,7 @@
 #include "not_found_handler.h"
 
-bool NotFoundHandler::Init(const NginxConfig& config) {
-    return true;
+NotFoundHandler* NotFoundHandler::create(const NginxConfig& config, const std::string& root_path) {
+    return new NotFoundHandler;
 }
 
 bool NotFoundHandler::HandleRequest(const Request& request, Response* response){

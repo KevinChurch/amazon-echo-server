@@ -5,9 +5,9 @@
 // simple handler to echo back raw response
 class EchoHandler : public Handler {
 public:
-  bool Init(const NginxConfig& config);
+  static EchoHandler* create(const NginxConfig& config, const std::string& root_path);
   bool HandleRequest(const Request& request, Response* response);
 
 private:
-    std::string to_send;
+  std::string to_send;
 };

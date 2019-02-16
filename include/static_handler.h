@@ -4,8 +4,7 @@
 
 class StaticHandler: public Handler {
 public:
-  bool Init(const NginxConfig& config);
-  bool Init(const NginxConfig& config, std::string uri_prefix);
+  static StaticHandler* create(const NginxConfig& config, const std::string& root_path);
   bool HandleRequest(const Request& request, Response* response);
 
 private:
@@ -15,4 +14,5 @@ private:
   bool IsRegularFile(std::string path);
   std::string GetContentType(std::string file_name);
   std::string GetContent(std::ifstream& file);
+  bool Init(const NginxConfig& config, std::string uri_prefix);
 };
