@@ -18,7 +18,7 @@ using boost::asio::ip::tcp;
 void handler( const boost::system::error_code& error , int signal_number )
 {
   if (signal_number == 2) {
-    INFO << "Server has stoppped by user";
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "Server has stoppped by user";
   }
 
   exit(1);
@@ -29,11 +29,11 @@ int main(int argc, char* argv[])
   try {
     if (argc != 2) {
       std::cerr << "Usage: ./server <path to config file>\n";
-      ERROR << "Wrong number of arguments were provided by the user";
+      BOOST_LOG_SEV(my_logger::get(), ERROR) << "Wrong number of arguments were provided by the user";
       return 1;
     }
 
-    INFO << "Server started running...";
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "Server started running...";
 
     NginxConfigParser config_parser;
     NginxConfig config;
@@ -43,8 +43,8 @@ int main(int argc, char* argv[])
 
     unsigned short port = stoi(config.Find("server.listen"));
 
-    INFO << "Successfully parsed a config file";
-    INFO << "Running the server on port " << port;
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "Successfully parsed a config file";
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "Running the server on port " << port;
 
     // Construct a signal set registered for process termination.
     boost::asio::signal_set signals(io_service, SIGINT);
@@ -56,11 +56,11 @@ int main(int argc, char* argv[])
     io_service.run();
   }catch (ConfigParserException& e) {
     std::cerr << "Exception: " << e.what() << "\n";
-    ERROR << "Config parser exception: " << e.what();
+    BOOST_LOG_SEV(my_logger::get(), ERROR) << "Config parser exception: " << e.what();
     exit(1);
   }catch (std::exception& e) {
     std::cerr << "Exception: " << e.what() << "\n";
-    ERROR << "Exception: " << e.what();
+    BOOST_LOG_SEV(my_logger::get(), ERROR) << "Exception: " << e.what();
     exit(1);
   }
 

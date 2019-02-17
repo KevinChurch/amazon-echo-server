@@ -60,13 +60,13 @@ std::unique_ptr<Request> Request::ParseRequest(const std::string& original_reque
 
 	if (method != "GET") {
 		std::cerr << "Invalid method request!" << std::endl;
-		ERROR << "Invalid method request!";
+		BOOST_LOG_SEV(my_logger::get(), ERROR) << "Invalid method request!";
 		req->m_original_request = "";
 	}
 
 	if (version != "HTTP/1.1") {
 		std::cerr << "HTTP Version not support!" << std::endl;
-		ERROR << "HTTP Version not support!";
+		BOOST_LOG_SEV(my_logger::get(), ERROR) << "HTTP Version not support!";
 		req->m_original_request = "";
 	}
 

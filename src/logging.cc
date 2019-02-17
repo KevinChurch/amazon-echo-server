@@ -3,7 +3,6 @@
 namespace attrs   = boost::log::attributes;
 namespace expr    = boost::log::expressions;
 namespace logging = boost::log;
-
 namespace sinks = boost::log::sinks;
 namespace keywords = boost::log::keywords;
 
@@ -15,11 +14,12 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(my_logger, logger_t)
     logging::add_common_attributes();
 
     logging::add_file_log(
-      keywords::file_name = "server_log_%Y-%m-%d_%H:%M:%S_%N.log",
+      keywords::file_name = "server_log_%Y-%m-%d_%N.log",
       keywords::rotation_size = 10 * 1024 * 1024,   // rotate when the file size reaches 10 MB
       keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
       keywords::auto_flush = true,
-      keywords::format = "[%TimeStamp%] [Thread %ThreadID%] [%Severity%]: %Message%"
+      keywords::format = "[%TimeStamp%] [Thread %ThreadID%] [%Severity%]: %Message%",
+      keywords::open_mode = std::ios_base::app
     );
 
     logging::add_console_log(

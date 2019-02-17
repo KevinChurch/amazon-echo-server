@@ -71,7 +71,7 @@ int Session::handle_request(){
 		original_request_str.erase(original_request_str.size() - 1);
 	}
 
-  INFO << s << " - - " << original_request_str << ' ' << reply_ptr->status_code();
+  BOOST_LOG_SEV(my_logger::get(), INFO) << s << " - - " << original_request_str << ' ' << reply_ptr->status_code();
 
   return 0;
 }
