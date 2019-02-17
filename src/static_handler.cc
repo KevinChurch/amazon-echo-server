@@ -2,47 +2,45 @@
 
 StaticHandler* StaticHandler::create(const NginxConfig& config, const std::string& root_path) {
   StaticHandler* handler = new StaticHandler;
-  handler->Init(config, "/static");
+  handler->Init(config, root_path);
   return handler;
 }
 
-bool StaticHandler::Init(const NginxConfig& config, std::string uri_prefix){
-  this->uri_prefix = uri_prefix;
-  if (config.Find("server.path2.location") == uri_prefix)
-    this->path_prefix = config.Find("server.path2.root");
-  else if (config.Find("server.path3.location") == uri_prefix)
-    this->path_prefix = config.Find("server.path3.root");
+bool StaticHandler::Init(const NginxConfig& config, const std::string& root_path) {
+  this->path_prefix = root_path;
+  if (config.Find("server.path2.root") == root_path)
+    this->uri_prefix = config.Find("server.path2.location");
+  else if (config.Find("server.path3.root") == root_path)
+    this->uri_prefix = config.Find("server.path3.location");
   else{//failed to find matching root
-    this->path_prefix = "";
+    this->uri_prefix = "";
     return false;
   }
   return true;
 }
 
-bool StaticHandler::HandleRequest(const Request& request, Reply* reply){
+std::unique_ptr<Reply> StaticHandler::HandleRequest(const Request& request) {
   std::cout << "\nStaticHandler::HandleRequest" << std::endl;
-
+  std::unique_ptr<Reply> reply_ptr(new Reply());
   std::string file_path = GetPath(request.uri());
-  std::cout << file_path << std::endl;
   std::ifstream file;
 
   if(!IsRegularFile(file_path)){
     std::cerr << "Error: Static File requested, but file is not regular" << std::endl;
-    return false;
+    return nullptr;
   }
 
   file.open(file_path);
   if(!file.is_open()){
     std::cerr << "Error: File could not be opened" << std::endl;
-    return false;
+    return nullptr;
   }
 
   std::string file_content = GetContent(file);
-  reply->SetStatus(200);
-  reply->SetHeader("Content-Type", GetContentType(file_path));
-  reply->SetBody(file_content);
-
-  return true;
+  reply_ptr->SetStatus(200);
+  reply_ptr->SetHeader("Content-Type", GetContentType(file_path));
+  reply_ptr->SetBody(file_content);
+  return reply_ptr; 
 }
 
 std::string StaticHandler::GetPath(std::string url){

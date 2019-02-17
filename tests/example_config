@@ -38,3 +38,7 @@ handler static {
 handler echo {
     location /echo;
 }
+
+handler not_found {
+    location /;
+}

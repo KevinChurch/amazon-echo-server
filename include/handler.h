@@ -14,5 +14,5 @@
 class Handler {
 public:
   static Handler* create(const NginxConfig& config, const std::string& root_path);
-  virtual bool HandleRequest(const Request& request, Reply* reply) = 0;
+  virtual std::unique_ptr<Reply> HandleRequest(const Request& request) = 0;
 };

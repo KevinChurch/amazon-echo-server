@@ -2,7 +2,6 @@
 #include "request.h"
 #include "reply.h"
 #include "logging.h"
-#include "not_found_handler.h"
 
 #include <termios.h>
 #include <unistd.h>
@@ -10,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#define quote(x) #x
 
 Session::Session(boost::asio::io_service& io_service,
   std::map <std::string, boost::shared_ptr<Handler>> handler_map)
@@ -44,25 +44,25 @@ boost::asio::async_read_until(socket_, buffer, "\r\n\r\n",
 }
 
 int Session::handle_request(){
-  Reply reply = Reply();
   auto request = Request::ParseRequest(get_message_request());
   std::string s = socket_.remote_endpoint().address().to_string();
 
   std::string longest_prefix = get_longest_prefix(request->uri());
   boost::shared_ptr<Handler> handler_ptr = handler_map[longest_prefix];
+
   if (!handler_ptr){
-    handler_ptr.reset(new NotFoundHandler);
+    handler_ptr = handler_map["/"];
   }
 
-  bool success = handler_ptr->HandleRequest(*request, &reply);
+  std::unique_ptr<Reply> reply_ptr = handler_ptr->HandleRequest(*request);
 
   //If failure, use NotFound Handler
-  if(!success){
-    handler_ptr.reset(new NotFoundHandler);
-    handler_ptr->HandleRequest(*request, &reply);
+  if(!reply_ptr){
+    handler_ptr = handler_map["/"];
+    reply_ptr = handler_ptr->HandleRequest(*request);
   }
 
-  write_string(reply.ToString());
+  write_string(reply_ptr->ToString());
 
   std::string original_request_str = request->original_request();
 	while(!original_request_str.empty()
@@ -71,7 +71,7 @@ int Session::handle_request(){
 		original_request_str.erase(original_request_str.size() - 1);
 	}
 
-  INFO << s << " - - " << original_request_str << ' ' << reply.status_code();
+  INFO << s << " - - " << original_request_str << ' ' << reply_ptr->status_code();
 
   return 0;
 }

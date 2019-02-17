@@ -17,4 +17,9 @@ server{
     root ./www/data;
     handler StaticHandler;
   }
+
+  path4{
+    location /;
+    handler NotFoundHandler;
+  }
 }

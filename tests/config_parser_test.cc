@@ -43,6 +43,9 @@ handler static {\n\
 }\n\
 handler echo {\n\
   location /echo;\n\
+}\n\
+handler not_found {\n\
+  location /;\n\
 }\n");
 
   EXPECT_EQ(out_config.ToString(1), "\
@@ -58,6 +61,9 @@ handler echo {\n\
   }\n\
   handler echo {\n\
     location /echo;\n\
+  }\n\
+  handler not_found {\n\
+    location /;\n\
   }\n");
 }
 
@@ -97,20 +103,20 @@ TEST_F(NginxConfigParserTest, FindBlocks) {
   parser.Parse("example_config", &out_config);
 
   // FindBlocks with String
-  EXPECT_EQ(out_config.FindBlocks("handler").size(), 3);
+  EXPECT_EQ(out_config.FindBlocks("handler").size(), 4);
   EXPECT_NE(out_config.FindBlocks("handler").size(), 0);
 
   // FindBlocks with Vector
   std::vector<std::string> vect1 = {"handler"};
-  EXPECT_EQ(out_config.FindBlocks(vect1).size(), 3);
+  EXPECT_EQ(out_config.FindBlocks(vect1).size(), 4);
   EXPECT_NE(out_config.FindBlocks(vect1).size(), 0);
 
   // // FindBlocks with Vector and Value
   std::vector<NginxConfig*> blocks1;
-  EXPECT_EQ(out_config.FindBlocks(vect1, blocks1).size(), 3);
+  EXPECT_EQ(out_config.FindBlocks(vect1, blocks1).size(), 4);
   EXPECT_NE(out_config.FindBlocks(vect1, blocks1).size(), 0);
 
-  std::vector<std::string> locations = {"/static", "/static2", "/echo"};
+  std::vector<std::string> locations = {"/static", "/static2", "/echo", "/"};
   std::vector<NginxConfig*> configs = out_config.FindBlocks("handler");
   for (int i = 0; i < locations.size(); ++i) {
     EXPECT_EQ(configs[i]->Find("location"), locations[i]);
