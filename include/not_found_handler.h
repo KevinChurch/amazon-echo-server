@@ -1,6 +1,8 @@
 #pragma once
 
 #include "handler.h"
+#include "request.h"
+#include "reply.h"
 
 class NotFoundHandler : public Handler {
 public:

@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 
     boost::asio::io_service io_service;
 
-    unsigned short port = stoi(config.Find("server.listen"));
+    unsigned short port = stoi(config.Find("port"));
 
     BOOST_LOG_SEV(my_logger::get(), INFO) << "Successfully parsed a config file";
     BOOST_LOG_SEV(my_logger::get(), INFO) << "Running the server on port " << port;

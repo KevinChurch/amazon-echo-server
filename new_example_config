@@ -4,7 +4,7 @@ port 80;
 
 # The server root must be called “root” and must be interpreted as an
 # absolute path.
-root /usr/src/projects/amazon-echo-server;  # Contents passed to handler manager config
+root /usr/src/projects/amazon-echo-server/;  # Contents passed to handler manager config
 
 # format is “handler-major”. The keyword is “handler” and the name of
 # the handler follows. Multiple handlers of the same type are registered
@@ -25,7 +25,7 @@ handler static { # inner block is the NginxConfig passed to the handler creation
 
     # It is fine to have other server-specific per-handler attributes in
     # the config block for that handler.
-    # log warn static1.log;
+    name static;
 }
 
 # Example: blue text is what is passed to the handler factory:
@@ -33,12 +33,15 @@ handler static { # inner block is the NginxConfig passed to the handler creation
 handler static {
     location /static2;
     root static;
+    name static;    
 }
 
 handler echo {
     location /echo;
+    name echo;
 }
 
 handler not_found {
     location /;
+    name not_found;
 }

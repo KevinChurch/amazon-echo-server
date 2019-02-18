@@ -1,3 +1,4 @@
+#include "handler_manager.h"
 #include "session.h"
 #include "request.h"
 #include "reply.h"
@@ -11,9 +12,8 @@
 #include <memory>
 #define quote(x) #x
 
-Session::Session(boost::asio::io_service& io_service,
-  std::map <std::string, boost::shared_ptr<Handler>> handler_map)
-    : socket_(io_service), handler_map(handler_map) { }
+Session::Session(boost::asio::io_service& io_service, const NginxConfig config)
+    : socket_(io_service), config(config) { }
 
 void Session::handle_read(const boost::system::error_code& error,
     size_t bytes_transferred) {
@@ -46,30 +46,48 @@ boost::asio::async_read_until(socket_, buffer, "\r\n\r\n",
 int Session::handle_request(){
   auto request = Request::ParseRequest(get_message_request());
   std::string s = socket_.remote_endpoint().address().to_string();
+  std::string original_url = request->uri();
+  
+  NginxConfig *handler_config;
+  unsigned int longest_match_size = 0;
+  std::string handler_name = "";
+  
 
-  std::string longest_prefix = get_longest_prefix(request->uri());
-  boost::shared_ptr<Handler> handler_ptr = handler_map[longest_prefix];
-
-  if (!handler_ptr){
-    handler_ptr = handler_map["/"];
+  //Find longest matching URI
+  std::vector<NginxConfig*> handlers = config.FindBlocks("handler");
+  for (std::vector<NginxConfig*>::iterator iter = handlers.begin(); iter != handlers.end(); iter++){
+    std::string prefix = (*iter)->Find("location");
+    if (original_url.find(prefix) == 0){
+      if (prefix.length() > longest_match_size){
+	longest_match_size = prefix.length();
+	handler_name = (*iter)->Find("name");
+	handler_config = *iter;
+      }
+    }
   }
+
+  std::unique_ptr<Handler> handler_ptr(manager.createByName(handler_name,
+							    *handler_config,
+							    config.Find("root")));
 
   std::unique_ptr<Reply> reply_ptr = handler_ptr->HandleRequest(*request);
 
   //If failure, use NotFound Handler
   if(!reply_ptr){
-    handler_ptr = handler_map["/"];
-    reply_ptr = handler_ptr->HandleRequest(*request);
+  std::unique_ptr<Handler> error_ptr(manager.createByName("not_found",
+							  this->config,
+							  config.Find("root")));
+    reply_ptr = error_ptr->HandleRequest(*request);
   }
 
   write_string(reply_ptr->ToString());
 
   std::string original_request_str = request->original_request();
-	while(!original_request_str.empty()
-	      && original_request_str[original_request_str.size() - 1] == '\n'
-	      || original_request_str[original_request_str.size() - 1] == '\r') {
-		original_request_str.erase(original_request_str.size() - 1);
-	}
+  while(!original_request_str.empty()
+	&& original_request_str[original_request_str.size() - 1] == '\n'
+	|| original_request_str[original_request_str.size() - 1] == '\r') {
+    original_request_str.erase(original_request_str.size() - 1);
+  }
 
   BOOST_LOG_SEV(my_logger::get(), INFO) << s << " - - " << original_request_str << ' ' << reply_ptr->status_code();
 
@@ -105,19 +123,3 @@ std::string Session::get_message_request()
   return msg;
 }
 
-
-std::string Session::get_longest_prefix(const std::string original_url)
-{
-  unsigned int longest_match_size = 0;
-  std::string longest_match = "";
-
-  for (auto const& iter : handler_map){
-    if (original_url.find(iter.first) == 0){
-      if (iter.first.length() > longest_match_size){
-        longest_match = iter.first;
-        longest_match_size = iter.first.length();
-      }
-    }
-  }
-  return longest_match;
-}

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "handler.h"
+#include "request.h"
+#include "reply.h"
 
 class StaticHandler: public Handler {
 public:
@@ -10,6 +12,7 @@ public:
 private:
   std::string uri_prefix;
   std::string path_prefix;
+  std::string root_path;
   std::string GetPath(std::string url);
   bool IsRegularFile(std::string path);
   std::string GetContentType(std::string file_name);

@@ -18,9 +18,9 @@ private:
   void handle_accept(Session* new_session,
       const boost::system::error_code& error);
 
+  NginxConfig config_;
   boost::asio::io_service& io_service_;
   tcp::acceptor acceptor_;
-  std::map <std::string, boost::shared_ptr<Handler>> handler_map_;
 };
 
 #endif

@@ -1,7 +1,7 @@
-#ifndef SESSION_H
-#define SESSION_H
+#pragma once
 
 #include "handler.h"
+#include "handler_manager.h"
 #include <cstdlib>
 #include <iostream>
 #include <boost/bind.hpp>
@@ -11,8 +11,7 @@ using boost::asio::ip::tcp;
 
 class Session {
 public:
-  Session(boost::asio::io_service& io_service, 
-    std::map <std::string, boost::shared_ptr<Handler>> handler_map);
+  Session(boost::asio::io_service& io_service, const NginxConfig config);
 
   tcp::socket& socket() {
     return socket_;
@@ -29,13 +28,11 @@ private:
   void handle_write(const boost::system::error_code& error);
 
   std::string get_message_request();
-  std::string get_longest_prefix(const std::string original_url);
   boost::asio::streambuf buffer;
 
   tcp::socket socket_;
   enum { max_length = 1024 };
   char data_[max_length];
-  std::map <std::string, boost::shared_ptr<Handler>> handler_map;
+  HandlerManager manager;
+  const NginxConfig config;
 };
-
-#endif

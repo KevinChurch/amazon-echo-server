@@ -7,15 +7,10 @@ StaticHandler* StaticHandler::create(const NginxConfig& config, const std::strin
 }
 
 bool StaticHandler::Init(const NginxConfig& config, const std::string& root_path) {
-  this->path_prefix = root_path;
-  if (config.Find("server.path2.root") == root_path)
-    this->uri_prefix = config.Find("server.path2.location");
-  else if (config.Find("server.path3.root") == root_path)
-    this->uri_prefix = config.Find("server.path3.location");
-  else{//failed to find matching root
-    this->uri_prefix = "";
-    return false;
-  }
+  this->root_path = root_path;
+  this->path_prefix = config.Find("root");
+  this->uri_prefix = config.Find("location");
+
   return true;
 }
 
@@ -50,7 +45,7 @@ std::unique_ptr<Reply> StaticHandler::HandleRequest(const Request& request) {
 std::string StaticHandler::GetPath(std::string url){
   //We assume the url has the prefix declared in the StaticHandler
   int prefix_len = this->uri_prefix.length();
-  std::string path = this->path_prefix + url.substr(prefix_len);
+  std::string path = this->root_path + this->path_prefix + url.substr(prefix_len);
 
   return path;
 }

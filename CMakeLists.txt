@@ -31,7 +31,7 @@ add_library(server_lib src/server.cc)
 add_library(reply_lib src/reply.cc)
 add_library(request_lib src/request.cc)
 add_library(session_lib src/session.cc)
-add_library(handler_lib src/echo_handler.cc src/static_handler.cc src/not_found_handler.cc)
+add_library(handler_lib src/echo_handler.cc src/static_handler.cc src/not_found_handler.cc src/request.cc src/reply.cc src/handler_manager.cc)
 add_library(logging_lib src/logging.cc)
 
 add_executable(server src/server_main.cc src/session.cc)
@@ -39,7 +39,7 @@ target_link_libraries(server
     PRIVATE
         config_parser_lib
         server_lib
-        request_lib
+	request_lib
         reply_lib
       	handler_lib
         logging_lib

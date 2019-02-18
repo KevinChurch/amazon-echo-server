@@ -76,6 +76,7 @@ std::unique_ptr<Request> Request::ParseRequest(const std::string& original_reque
 	req->m_method = method;
 	req->m_uri = url;
 	req->m_version = version;
+
 	return req;
 
 }

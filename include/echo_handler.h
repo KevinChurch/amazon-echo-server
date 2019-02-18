@@ -1,6 +1,8 @@
 #pragma once
 
 #include "handler.h"
+#include "request.h"
+#include "reply.h"
 
 // simple handler to echo back raw reply
 class EchoHandler : public Handler {
