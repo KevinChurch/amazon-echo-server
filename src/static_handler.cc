@@ -21,18 +21,22 @@ bool StaticHandler::Init(const NginxConfig& config, const std::string& root_path
 
 std::unique_ptr<Reply> StaticHandler::HandleRequest(const Request& request) {
   std::cout << "\nStaticHandler::HandleRequest" << std::endl;
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "\nStaticHandler::HandleRequest";
+
   std::unique_ptr<Reply> reply_ptr(new Reply());
   std::string file_path = GetPath(request.uri());
   std::ifstream file;
 
   if(!IsRegularFile(file_path)){
     std::cerr << "Error: Static File requested, but file is not regular" << std::endl;
+    BOOST_LOG_SEV(my_logger::get(), ERROR) << "Static File requested, but file is not regular";
     return nullptr;
   }
 
   file.open(file_path);
   if(!file.is_open()){
     std::cerr << "Error: File could not be opened" << std::endl;
+    BOOST_LOG_SEV(my_logger::get(), ERROR) << "File could not be opened"
     return nullptr;
   }
 
@@ -40,7 +44,7 @@ std::unique_ptr<Reply> StaticHandler::HandleRequest(const Request& request) {
   reply_ptr->SetStatus(200);
   reply_ptr->SetHeader("Content-Type", GetContentType(file_path));
   reply_ptr->SetBody(file_content);
-  return reply_ptr; 
+  return reply_ptr;
 }
 
 std::string StaticHandler::GetPath(std::string url){

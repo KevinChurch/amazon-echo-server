@@ -14,8 +14,9 @@ NotFoundHandler* NotFoundHandler::create(const NginxConfig& config, const std::s
 
 std::unique_ptr<Reply> NotFoundHandler::HandleRequest(const Request& request) {
   std::cout << "\nNotFoundHandler::HandleRequest" << std::endl;
-  std::unique_ptr<Reply> reply_ptr(new Reply());
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "\nNotFoundHandler::HandleRequest";
 
+  std::unique_ptr<Reply> reply_ptr(new Reply());
   std::string body = "404 NOT FOUND\r\n";
   reply_ptr->SetStatus(404);
   reply_ptr->SetHeader("Content-Type", "text/plain");

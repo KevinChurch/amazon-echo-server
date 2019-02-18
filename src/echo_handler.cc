@@ -14,6 +14,8 @@ EchoHandler* EchoHandler::create(const NginxConfig& config, const std::string& r
 
 std::unique_ptr<Reply> EchoHandler::HandleRequest(const Request& request) {
   std::cout << "\nEchoHandler::HandleRequest" << std::endl;
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "\nEchoHandler::HandleRequest";
+
   std::unique_ptr<Reply> reply_ptr(new Reply());
   reply_ptr->SetStatus(200);
   reply_ptr->SetHeader("Content-Type", "text/plain");

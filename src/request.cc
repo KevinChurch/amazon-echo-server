@@ -25,7 +25,7 @@ std::unique_ptr<Request> Request::ParseRequest(const std::string& original_reque
 		  	if (i == 0){
 		    	req->m_original_request = "";
 		    	std::cerr << "400 BAD REQUEST!" << std::endl;
-				ERROR << "400 BAD REQUEST!";
+				BOOST_LOG_SEV(my_logger::get(), ERROR) << "400 BAD REQUEST!";
 				method = "";
 				url = "";
 				version = "";
@@ -34,7 +34,7 @@ std::unique_ptr<Request> Request::ParseRequest(const std::string& original_reque
 		  	if (original_request[i-1] == ' '){
 		    	req->m_original_request = "";
 		    	std::cerr << "400 BAD REQUEST!" << std::endl;
-				ERROR << "400 BAD REQUEST!";
+				BOOST_LOG_SEV(my_logger::get(), ERROR) << "400 BAD REQUEST!";
 				method = "";
 				url = "";
 				version = "";
