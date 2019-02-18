@@ -10,6 +10,7 @@
 #include "reply.h"
 #include "request.h"
 #include "config_parser.h"
+#include "logging.h"
 
 class Handler {
 public:

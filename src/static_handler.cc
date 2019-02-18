@@ -36,7 +36,7 @@ std::unique_ptr<Reply> StaticHandler::HandleRequest(const Request& request) {
   file.open(file_path);
   if(!file.is_open()){
     std::cerr << "Error: File could not be opened" << std::endl;
-    BOOST_LOG_SEV(my_logger::get(), ERROR) << "File could not be opened"
+    BOOST_LOG_SEV(my_logger::get(), ERROR) << "File could not be opened";
     return nullptr;
   }
 
