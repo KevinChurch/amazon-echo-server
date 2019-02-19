@@ -2,6 +2,7 @@
 #include "echo_handler.h"
 #include "static_handler.h"
 #include "not_found_handler.h"
+#include "status_handler.h"
 #include "handler_manager.h"
 #include "reply.h"
 #include "request.h"
@@ -13,7 +14,7 @@
 // your class that exact name.) This registration class is just a factory
 // that is meant to interface between handlers and the server code.
 
-  
+
   // This “do it” method returns a pointer to the request handler. The
   // caller takes ownership of the object.
   // (Handler class may be called something different.)
@@ -23,7 +24,7 @@
   //   This is the contents of the block following the declaration of the
   //   named handler in the file.
   // path : the global absolute path root for the server.
-  
+
 std::unique_ptr<Handler> HandlerManager::createByName(const std::string& name,
 						     const NginxConfig& config,
 						     const std::string& root_path){
@@ -35,6 +36,13 @@ std::unique_ptr<Handler> HandlerManager::createByName(const std::string& name,
     handler_ptr.reset(StaticHandler::create(config, root_path));
   }else if (name == "not_found"){
     handler_ptr.reset(NotFoundHandler::create(config, root_path));
+  }else if (name == "status"){
+    // handler_ptr.reset(StatusHandler::create(config, root_path));
+    StatusHandler* st_handler = StatusHandler::create(config, root_path);
+    st_handler->setRequestInfo(this->handler_request_map);
+    st_handler->setHandlers(this->handlers);
+    handler_ptr.reset(st_handler);
+    // delete st_handler;
   }
 
   return handler_ptr;
@@ -46,3 +54,11 @@ std::unique_ptr<Handler> HandlerManager::createByName(const std::string& name,
     //   case “echo”: return EchoHandler::create(config, path);
     //   case “static”: return StaticHandler::create(config, path);
     //   case “404”: return 404Handler::create(config, path)
+
+void HandlerManager::setRequestMap(std::map<std::string, std::map<int, int>>* request_map){
+  this->handler_request_map = request_map;
+}
+
+void HandlerManager::setHandlers(std::vector<NginxConfig*> handlers){
+  this->handlers = handlers;
+}

@@ -12,46 +12,48 @@
 #include <memory>
 #define quote(x) #x
 
-Session::Session(boost::asio::io_service& io_service, const NginxConfig config)
-    : socket_(io_service), config(config) { }
+Session::Session(boost::asio::io_service& io_service,
+  const NginxConfig config,
+  std::map<std::string, std::map<int, int>>* request_map)
+  : socket_(io_service), config(config), request_map(request_map) { }
 
 void Session::handle_read(const boost::system::error_code& error,
-    size_t bytes_transferred) {
-    if (!error) {
-        boost::asio::async_write(socket_,
-            boost::asio::buffer(data_, bytes_transferred),
-            boost::bind(&Session::handle_write, this,
-            boost::asio::placeholders::error));
-    } else {
-        delete this;
-    }
+  size_t bytes_transferred) {
+  if (!error) {
+      boost::asio::async_write(socket_,
+          boost::asio::buffer(data_, bytes_transferred),
+          boost::bind(&Session::handle_write, this,
+          boost::asio::placeholders::error));
+  } else {
+      delete this;
+  }
 }
 
 void Session::handle_write(const boost::system::error_code& error) {
-    if (!error) {
-        socket_.async_read_some(boost::asio::buffer(data_, max_length),
-            boost::bind(&Session::handle_read, this,
-            boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred));
-    } else {
-        delete this;
-    }
+  if (!error) {
+    socket_.async_read_some(boost::asio::buffer(data_, max_length),
+      boost::bind(&Session::handle_read, this,
+      boost::asio::placeholders::error,
+      boost::asio::placeholders::bytes_transferred));
+  } else {
+    delete this;
+  }
 }
 
 void Session::start() {
-boost::asio::async_read_until(socket_, buffer, "\r\n\r\n",
-      boost::bind(&Session::handle_request, this));
+  boost::asio::async_read_until(socket_, buffer, "\r\n\r\n",
+  boost::bind(&Session::handle_request, this));
 }
 
 int Session::handle_request(){
   auto request = Request::ParseRequest(get_message_request());
   std::string s = socket_.remote_endpoint().address().to_string();
   std::string original_url = request->uri();
-  
+
   NginxConfig *handler_config;
   unsigned int longest_match_size = 0;
   std::string handler_name = "";
-  
+
 
   //Find longest matching URI
   std::vector<NginxConfig*> handlers = config.FindBlocks("handler");
@@ -59,13 +61,15 @@ int Session::handle_request(){
     std::string prefix = (*iter)->Find("location");
     if (original_url.find(prefix) == 0){
       if (prefix.length() > longest_match_size){
-	longest_match_size = prefix.length();
-	handler_name = (*iter)->Find("name");
-	handler_config = *iter;
+      	longest_match_size = prefix.length();
+      	handler_name = (*iter)->Find("name");
+      	handler_config = *iter;
       }
     }
   }
 
+  manager.setRequestMap(request_map);
+  manager.setHandlers(handlers);
   std::unique_ptr<Handler> handler_ptr(manager.createByName(handler_name,
 							    *handler_config,
 							    config.Find("root")));
@@ -78,6 +82,17 @@ int Session::handle_request(){
 							  this->config,
 							  config.Find("root")));
     reply_ptr = error_ptr->HandleRequest(*request);
+  }
+
+  // putting the request to the request_map
+  if(request_map->find(request->uri()) != request_map->end()) {
+    if((*request_map)[request->uri()].find(reply_ptr->status_code()) != (*request_map)[request->uri()].end()) {
+      (*request_map)[request->uri()][reply_ptr->status_code()] += 1;
+    } else {
+      (*request_map)[request->uri()][reply_ptr->status_code()] = 1;
+    }
+  } else {
+    (*request_map)[request->uri()][reply_ptr->status_code()] = 1;
   }
 
   write_string(reply_ptr->ToString());
@@ -94,8 +109,6 @@ int Session::handle_request(){
   return 0;
 }
 
-
-
 void Session::write_string(std::string send) {
 
   boost::asio::streambuf out_streambuf;
@@ -110,9 +123,6 @@ void Session::write_string(std::string send) {
   socket_.close();
 }
 
-
-
-
 std::string Session::get_message_request()
 {
   std::string msg{
@@ -122,4 +132,3 @@ std::string Session::get_message_request()
 
   return msg;
 }
-

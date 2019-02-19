@@ -21,6 +21,7 @@ private:
   NginxConfig config_;
   boost::asio::io_service& io_service_;
   tcp::acceptor acceptor_;
+  std::map<std::string, std::map<int, int>> request_map_;
 };
 
 #endif

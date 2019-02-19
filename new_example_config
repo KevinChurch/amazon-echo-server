@@ -33,7 +33,7 @@ handler static { # inner block is the NginxConfig passed to the handler creation
 handler static {
     location /static2;
     root static;
-    name static;    
+    name static;
 }
 
 handler echo {
@@ -44,4 +44,9 @@ handler echo {
 handler not_found {
     location /;
     name not_found;
+}
+
+handler status {
+    location /status;
+    name status;
 }

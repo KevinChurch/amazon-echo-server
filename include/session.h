@@ -11,7 +11,9 @@ using boost::asio::ip::tcp;
 
 class Session {
 public:
-  Session(boost::asio::io_service& io_service, const NginxConfig config);
+  Session(boost::asio::io_service& io_service,
+    const NginxConfig config,
+    std::map<std::string, std::map<int, int>>* request_map);
 
   tcp::socket& socket() {
     return socket_;
@@ -23,7 +25,7 @@ public:
 
 private:
   void handle_read(const boost::system::error_code& error,
-		   size_t bytes_transferred);
+    size_t bytes_transferred);
 
   void handle_write(const boost::system::error_code& error);
 
@@ -35,4 +37,5 @@ private:
   char data_[max_length];
   HandlerManager manager;
   const NginxConfig config;
+  std::map<std::string, std::map<int, int>> *request_map;
 };
