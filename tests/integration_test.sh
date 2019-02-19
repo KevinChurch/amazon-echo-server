@@ -77,14 +77,14 @@ file_test() {
         EXT="html"
     fi
     TEMP_FILE="temp.$EXT"
-    curl -s "$1" > TEMP_FILE
-    if cmp -s TEMP_FILE "$2" ; then
+    curl -s $1 > $TEMP_FILE
+    if cmp -s $TEMP_FILE $2 ; then
         echo "pass"
     else
         echo "fail"
         PASS=0
     fi
-    rm TEMP_FILE
+    rm $TEMP_FILE
 }
 
 
@@ -119,7 +119,7 @@ file_test "localhost:8080/static/index.html" "static/index.html"
 # Image Handler
 file_test "localhost:8080/static/amazon.jpg" "static/amazon.jpg"
 
-# # TXT Handler
+# TXT Handler
 file_test "localhost:8080/static/amazon.txt" "static/amazon.txt"
 
 kill_server
