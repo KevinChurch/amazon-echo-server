@@ -1,10 +1,10 @@
 # Non-documented server attributes can be called whatever you want. Like
 # “port” or “listen” etc.
-port 80;
+port 8080;
 
 # The server root must be called “root” and must be interpreted as an
 # absolute path.
-root ./;  # Contents passed to handler manager config
+root /usr/src/projects/amazon-echo-server/;  # Contents passed to handler manager config
 
 # format is “handler-major”. The keyword is “handler” and the name of
 # the handler follows. Multiple handlers of the same type are registered
