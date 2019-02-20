@@ -22,11 +22,11 @@ goto() {
 # starts server
 run_server() {
     if [ -d "$BUILD" ]; then
-        echo "build/bin/server new_dev_config &"
-        build/bin/server new_dev_config &
+        echo "build/bin/server dev_config &"
+        build/bin/server dev_config &
     elif [ -d "$BUILD_COVERAGE" ]; then
-        echo "build_coverage/bin/server new_dev_config &"
-        build_coverage/bin/server new_dev_config &
+        echo "build_coverage/bin/server dev_config &"
+        build_coverage/bin/server dev_config &
     else
         exit 1
     fi

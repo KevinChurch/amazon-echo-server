@@ -18,8 +18,8 @@ FROM ubuntu:latest as deploy
 
 # TODO(!): Copy server output binary to "."
 COPY --from=builder /usr/src/project/build/bin/server ./build/bin/
-COPY --from=builder /usr/src/project/new_example_config .
-COPY --from=builder /usr/src/project/new_dev_config .
+COPY --from=builder /usr/src/project/example_config .
+COPY --from=builder /usr/src/project/dev_config .
 COPY --from=builder /usr/src/project/static ./static
 COPY --from=builder /usr/src/project/www/data ./www/data
 # TODO(!): Expose some port(s)
@@ -31,4 +31,4 @@ ENTRYPOINT ["./build/bin/server"]
 
 # Use CMD to specify arguments to ENTRYPOINT
 # TODO(!): Update with real server args
-CMD ["./new_example_config"]
+CMD ["./example_config"]

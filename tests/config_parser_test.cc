@@ -32,38 +32,54 @@ TEST_F(NginxConfigParserTest, ToString) {
 
   EXPECT_EQ(out_config.ToString(0), "\
 port 80;\n\
-root /usr/src/projects/amazon-echo-server;\n\
+root ./;\n\
 handler static {\n\
   location /static;\n\
   root static;\n\
+  name static;\n\
 }\n\
 handler static {\n\
   location /static2;\n\
-  root static;\n\
+  root /www/data;\n\
+  name static;\n\
 }\n\
 handler echo {\n\
   location /echo;\n\
+  name echo;\n\
 }\n\
 handler not_found {\n\
   location /;\n\
+  name not_found;\n\
+}\n\
+handler status {\n\
+  location /status;\n\
+  name status;\n\
 }\n");
 
   EXPECT_EQ(out_config.ToString(1), "\
   port 80;\n\
-  root /usr/src/projects/amazon-echo-server;\n\
+  root ./;\n\
   handler static {\n\
     location /static;\n\
     root static;\n\
+    name static;\n\
   }\n\
   handler static {\n\
     location /static2;\n\
-    root static;\n\
+    root /www/data;\n\
+    name static;\n\
   }\n\
   handler echo {\n\
     location /echo;\n\
+    name echo;\n\
   }\n\
   handler not_found {\n\
     location /;\n\
+    name not_found;\n\
+  }\n\
+  handler status {\n\
+    location /status;\n\
+    name status;\n\
   }\n");
 }
 
@@ -72,7 +88,7 @@ TEST_F(NginxConfigParserTest, Find) {
 
   // Find with String
   EXPECT_EQ(out_config.Find("port"), "80");
-  EXPECT_EQ(out_config.Find("root"), "/usr/src/projects/amazon-echo-server");
+  EXPECT_EQ(out_config.Find("root"), "./");
 
   EXPECT_NE(out_config.Find("port"), "");
   EXPECT_NE(out_config.Find("root"), "");
@@ -81,7 +97,7 @@ TEST_F(NginxConfigParserTest, Find) {
   std::vector<std::string> vect1 = {"port"};
   EXPECT_EQ(out_config.Find(vect1), "80");
   std::vector<std::string> vect2 = {"root"};
-  EXPECT_EQ(out_config.Find(vect2), "/usr/src/projects/amazon-echo-server");
+  EXPECT_EQ(out_config.Find(vect2), "./");
   std::vector<std::string> vect3 = {"bad"};
   EXPECT_EQ(out_config.Find(vect3), "");
   std::vector<std::string> vect4 = {"bad", "bad"};
@@ -92,7 +108,7 @@ TEST_F(NginxConfigParserTest, Find) {
 
   // Find with Vector and Value
   EXPECT_EQ(out_config.Find(vect1, "100"), "80");
-  EXPECT_EQ(out_config.Find(vect2, "/"), "/usr/src/projects/amazon-echo-server");
+  EXPECT_EQ(out_config.Find(vect2, "/"), "./");
   EXPECT_EQ(out_config.Find(vect3, "good"), "good");
   EXPECT_EQ(out_config.Find(vect4, "good"), "good");
 
@@ -103,20 +119,20 @@ TEST_F(NginxConfigParserTest, FindBlocks) {
   parser.Parse("example_config", &out_config);
 
   // FindBlocks with String
-  EXPECT_EQ(out_config.FindBlocks("handler").size(), 4);
+  EXPECT_EQ(out_config.FindBlocks("handler").size(), 5);
   EXPECT_NE(out_config.FindBlocks("handler").size(), 0);
 
   // FindBlocks with Vector
   std::vector<std::string> vect1 = {"handler"};
-  EXPECT_EQ(out_config.FindBlocks(vect1).size(), 4);
+  EXPECT_EQ(out_config.FindBlocks(vect1).size(), 5);
   EXPECT_NE(out_config.FindBlocks(vect1).size(), 0);
 
   // // FindBlocks with Vector and Value
   std::vector<NginxConfig*> blocks1;
-  EXPECT_EQ(out_config.FindBlocks(vect1, blocks1).size(), 4);
+  EXPECT_EQ(out_config.FindBlocks(vect1, blocks1).size(), 5);
   EXPECT_NE(out_config.FindBlocks(vect1, blocks1).size(), 0);
 
-  std::vector<std::string> locations = {"/static", "/static2", "/echo", "/"};
+  std::vector<std::string> locations = {"/static", "/static2", "/echo", "/", "/status"};
   std::vector<NginxConfig*> configs = out_config.FindBlocks("handler");
   for (int i = 0; i < locations.size(); ++i) {
     EXPECT_EQ(configs[i]->Find("location"), locations[i]);
