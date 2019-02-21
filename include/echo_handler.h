@@ -1,15 +1,16 @@
 #pragma once
 
 #include "handler.h"
-#include "request.h"
 #include "reply.h"
+#include "request.h"
 
 // simple handler to echo back raw reply
 class EchoHandler : public Handler {
-public:
-  static EchoHandler* create(const NginxConfig& config, const std::string& root_path);
+ public:
+  static EchoHandler* create(const NginxConfig& config,
+                             const std::string& root_path);
   std::unique_ptr<Reply> HandleRequest(const Request& request);
 
-private:
+ private:
   std::string to_send;
 };

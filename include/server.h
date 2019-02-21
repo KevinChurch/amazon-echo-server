@@ -2,21 +2,22 @@
 #define SERVER_H
 
 #include <boost/asio.hpp>
-#include "session.h"
-#include "config_parser.h"
 #include <map>
+#include "config_parser.h"
+#include "session.h"
 
 using boost::asio::ip::tcp;
 
 class Server {
-public:
-  Server(boost::asio::io_service& io_service, unsigned short port, const NginxConfig config);
+ public:
+  Server(boost::asio::io_service& io_service, unsigned short port,
+         const NginxConfig config);
 
-private:
+ private:
   void start_accept();
 
   void handle_accept(Session* new_session,
-      const boost::system::error_code& error);
+                     const boost::system::error_code& error);
 
   NginxConfig config_;
   boost::asio::io_service& io_service_;

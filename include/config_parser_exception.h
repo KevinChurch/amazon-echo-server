@@ -4,8 +4,8 @@
 #include <string>
 
 class ConfigParserException : public std::exception {
-public:
-    ConfigParserException() {}
+ public:
+  ConfigParserException() {}
 
-    std::string what();
+  std::string what();
 };

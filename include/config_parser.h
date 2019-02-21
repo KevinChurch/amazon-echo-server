@@ -1,21 +1,22 @@
 // An nginx config file parser.
 #pragma once
 
+#include <boost/algorithm/string.hpp>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
-#include <map>
-#include <boost/algorithm/string.hpp>
 
 class NginxConfig;
 
 // The parsed representation of a single config statement.
 class NginxConfigStatement {
  public:
-  std::string ToString (int depth) const;
-  std::string Find (std::vector<std::string> vectorKey, std::string value) const;
-  std::vector<NginxConfig*> FindBlocks (std::vector<std::string> vectorKey, std::vector<NginxConfig*> blocks) const;
+  std::string ToString(int depth) const;
+  std::string Find(std::vector<std::string> vectorKey, std::string value) const;
+  std::vector<NginxConfig*> FindBlocks(std::vector<std::string> vectorKey,
+                                       std::vector<NginxConfig*> blocks) const;
   std::vector<std::string> tokens_;
   std::unique_ptr<NginxConfig> child_block_;
 };
@@ -29,8 +30,10 @@ class NginxConfig {
   std::string Find(std::vector<std::string> vectorKey) const;
   std::string Find(std::vector<std::string> vectorKey, std::string value) const;
   std::vector<NginxConfig*> FindBlocks(std::string key) const;
-  std::vector<NginxConfig*> FindBlocks(std::vector<std::string> vectorKey) const;
-  std::vector<NginxConfig*> FindBlocks(std::vector<std::string> vectorKey, std::vector<NginxConfig*> blocks) const;
+  std::vector<NginxConfig*> FindBlocks(
+      std::vector<std::string> vectorKey) const;
+  std::vector<NginxConfig*> FindBlocks(std::vector<std::string> vectorKey,
+                                       std::vector<NginxConfig*> blocks) const;
   std::vector<std::shared_ptr<NginxConfigStatement>> statements_;
 };
 

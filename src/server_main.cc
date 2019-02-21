@@ -9,14 +9,13 @@
 //
 
 #include "config_parser.h"
-#include "server.h"
 #include "config_parser_exception.h"
 #include "logging.h"
+#include "server.h"
 
 using boost::asio::ip::tcp;
 
-void handler( const boost::system::error_code& error , int signal_number )
-{
+void handler(const boost::system::error_code &error, int signal_number) {
   if (signal_number == 2) {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "Server has stoppped by user";
   }
@@ -24,12 +23,12 @@ void handler( const boost::system::error_code& error , int signal_number )
   exit(1);
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   try {
     if (argc != 2) {
       std::cerr << "Usage: ./server <path to config file>\n";
-      BOOST_LOG_SEV(my_logger::get(), ERROR) << "Wrong number of arguments were provided by the user";
+      BOOST_LOG_SEV(my_logger::get(), ERROR)
+          << "Wrong number of arguments were provided by the user";
       return 1;
     }
 
@@ -43,8 +42,10 @@ int main(int argc, char* argv[])
 
     unsigned short port = stoi(config.Find("port"));
 
-    BOOST_LOG_SEV(my_logger::get(), INFO) << "Successfully parsed a config file";
-    BOOST_LOG_SEV(my_logger::get(), INFO) << "Running the server on port " << port;
+    BOOST_LOG_SEV(my_logger::get(), INFO)
+        << "Successfully parsed a config file";
+    BOOST_LOG_SEV(my_logger::get(), INFO)
+        << "Running the server on port " << port;
 
     // Construct a signal set registered for process termination.
     boost::asio::signal_set signals(io_service, SIGINT);
@@ -54,11 +55,12 @@ int main(int argc, char* argv[])
     Server s(io_service, port, config);
 
     io_service.run();
-  }catch (ConfigParserException& e) {
+  } catch (ConfigParserException &e) {
     std::cerr << "Exception: " << e.what() << "\n";
-    BOOST_LOG_SEV(my_logger::get(), ERROR) << "Config parser exception: " << e.what();
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+        << "Config parser exception: " << e.what();
     exit(1);
-  }catch (std::exception& e) {
+  } catch (std::exception &e) {
     std::cerr << "Exception: " << e.what() << "\n";
     BOOST_LOG_SEV(my_logger::get(), ERROR) << "Exception: " << e.what();
     exit(1);

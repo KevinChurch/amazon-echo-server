@@ -37,25 +37,27 @@ std::string NginxConfig::Find(std::vector<std::string> vectorKey) const {
   return Find(vectorKey, value);
 }
 
-std::string NginxConfig::Find(std::vector<std::string> vectorKey, std::string value) const {
+std::string NginxConfig::Find(std::vector<std::string> vectorKey,
+                              std::string value) const {
   for (const auto& statement : statements_) {
     value = statement->Find(vectorKey, value);
   }
   return value;
 }
 
-std::string NginxConfigStatement::Find(std::vector<std::string> vectorKey, std::string value) const {
+std::string NginxConfigStatement::Find(std::vector<std::string> vectorKey,
+                                       std::string value) const {
   std::string key = vectorKey.front();
 
   if (!tokens_.empty() && (tokens_[0] == key)) {
     if (vectorKey.size() == 1) {
       value = tokens_[1];
     } else if (child_block_.get() != nullptr) {
-      std::vector<std::string> newVec(vectorKey.begin()+1, vectorKey.end());
+      std::vector<std::string> newVec(vectorKey.begin() + 1, vectorKey.end());
       value = child_block_->Find(newVec, value);
     }
   }
-  
+
   return value;
 }
 
@@ -65,30 +67,35 @@ std::vector<NginxConfig*> NginxConfig::FindBlocks(std::string key) const {
   return FindBlocks(vectorKey);
 }
 
-std::vector<NginxConfig*> NginxConfig::FindBlocks(std::vector<std::string> vectorKey) const {
+std::vector<NginxConfig*> NginxConfig::FindBlocks(
+    std::vector<std::string> vectorKey) const {
   std::vector<NginxConfig*> blocks;
   return FindBlocks(vectorKey, blocks);
 }
 
-std::vector<NginxConfig*> NginxConfig::FindBlocks(std::vector<std::string> vectorKey, std::vector<NginxConfig*> blocks) const {
+std::vector<NginxConfig*> NginxConfig::FindBlocks(
+    std::vector<std::string> vectorKey,
+    std::vector<NginxConfig*> blocks) const {
   for (const auto& statement : statements_) {
     blocks = statement->FindBlocks(vectorKey, blocks);
   }
   return blocks;
 }
 
-std::vector<NginxConfig*> NginxConfigStatement::FindBlocks(std::vector<std::string> vectorKey, std::vector<NginxConfig*> blocks) const {
+std::vector<NginxConfig*> NginxConfigStatement::FindBlocks(
+    std::vector<std::string> vectorKey,
+    std::vector<NginxConfig*> blocks) const {
   std::string key = vectorKey.front();
 
   if (!tokens_.empty()) {
     if (tokens_[0] == key) {
       if (vectorKey.size() == 1) {
-        NginxConfig *block = child_block_.get();
+        NginxConfig* block = child_block_.get();
         if (block != nullptr) {
           blocks.push_back(block);
         }
       } else {
-        std::vector<std::string> newVec(vectorKey.begin()+1, vectorKey.end());
+        std::vector<std::string> newVec(vectorKey.begin() + 1, vectorKey.end());
         blocks = FindBlocks(newVec, blocks);
       }
     } else if (child_block_.get() != nullptr) {
@@ -125,15 +132,24 @@ std::string NginxConfigStatement::ToString(int depth) const {
 
 const char* NginxConfigParser::TokenTypeAsString(TokenType type) {
   switch (type) {
-    case TOKEN_TYPE_START:         return "TOKEN_TYPE_START";
-    case TOKEN_TYPE_NORMAL:        return "TOKEN_TYPE_NORMAL";
-    case TOKEN_TYPE_START_BLOCK:   return "TOKEN_TYPE_START_BLOCK";
-    case TOKEN_TYPE_END_BLOCK:     return "TOKEN_TYPE_END_BLOCK";
-    case TOKEN_TYPE_COMMENT:       return "TOKEN_TYPE_COMMENT";
-    case TOKEN_TYPE_STATEMENT_END: return "TOKEN_TYPE_STATEMENT_END";
-    case TOKEN_TYPE_EOF:           return "TOKEN_TYPE_EOF";
-    case TOKEN_TYPE_ERROR:         return "TOKEN_TYPE_ERROR";
-    default:                       return "Unknown token type";
+    case TOKEN_TYPE_START:
+      return "TOKEN_TYPE_START";
+    case TOKEN_TYPE_NORMAL:
+      return "TOKEN_TYPE_NORMAL";
+    case TOKEN_TYPE_START_BLOCK:
+      return "TOKEN_TYPE_START_BLOCK";
+    case TOKEN_TYPE_END_BLOCK:
+      return "TOKEN_TYPE_END_BLOCK";
+    case TOKEN_TYPE_COMMENT:
+      return "TOKEN_TYPE_COMMENT";
+    case TOKEN_TYPE_STATEMENT_END:
+      return "TOKEN_TYPE_STATEMENT_END";
+    case TOKEN_TYPE_EOF:
+      return "TOKEN_TYPE_EOF";
+    case TOKEN_TYPE_ERROR:
+      return "TOKEN_TYPE_ERROR";
+    default:
+      return "Unknown token type";
   }
 }
 
@@ -201,8 +217,8 @@ NginxConfigParser::TokenType NginxConfigParser::ParseToken(std::istream* input,
         *value += c;
         continue;
       case TOKEN_STATE_TOKEN_TYPE_NORMAL:
-        if (c == ' ' || c == '\t' || c == '\n' || c == '\t' ||
-            c == ';' || c == '{' || c == '}') {
+        if (c == ' ' || c == '\t' || c == '\n' || c == '\t' || c == ';' ||
+            c == '{' || c == '}') {
           input->unget();
           return TOKEN_TYPE_NORMAL;
         }
@@ -212,8 +228,7 @@ NginxConfigParser::TokenType NginxConfigParser::ParseToken(std::istream* input,
   }
 
   // If we get here, we reached the end of the file.
-  if (state == TOKEN_STATE_SINGLE_QUOTE ||
-      state == TOKEN_STATE_DOUBLE_QUOTE) {
+  if (state == TOKEN_STATE_SINGLE_QUOTE || state == TOKEN_STATE_DOUBLE_QUOTE) {
     return TOKEN_TYPE_ERROR;
   }
 
@@ -252,8 +267,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
           config_stack.top()->statements_.emplace_back(
               new NginxConfigStatement);
         }
-        config_stack.top()->statements_.back().get()->tokens_.push_back(
-            token);
+        config_stack.top()->statements_.back().get()->tokens_.push_back(token);
       } else {
         // Error.
         break;
@@ -275,7 +289,7 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       ++block_count;
     } else if (token_type == TOKEN_TYPE_END_BLOCK) {
       if ((last_token_type != TOKEN_TYPE_STATEMENT_END &&
-          last_token_type != TOKEN_TYPE_END_BLOCK) ||
+           last_token_type != TOKEN_TYPE_END_BLOCK) ||
           !block_count) {
         // Error.
         break;
@@ -284,8 +298,8 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
       --block_count;
     } else if (token_type == TOKEN_TYPE_EOF) {
       if ((last_token_type != TOKEN_TYPE_STATEMENT_END &&
-          last_token_type != TOKEN_TYPE_END_BLOCK && 
-          last_token_type != TOKEN_TYPE_START) || 
+           last_token_type != TOKEN_TYPE_END_BLOCK &&
+           last_token_type != TOKEN_TYPE_START) ||
           block_count) {
         // Error.
         break;
@@ -298,9 +312,8 @@ bool NginxConfigParser::Parse(std::istream* config_file, NginxConfig* config) {
     last_token_type = token_type;
   }
 
-  printf ("Bad transition from %s to %s\n",
-          TokenTypeAsString(last_token_type),
-          TokenTypeAsString(token_type));
+  printf("Bad transition from %s to %s\n", TokenTypeAsString(last_token_type),
+         TokenTypeAsString(token_type));
 
   throw ConfigParserException();
   return false;
@@ -310,7 +323,7 @@ bool NginxConfigParser::Parse(const char* file_name, NginxConfig* config) {
   std::ifstream config_file;
   config_file.open(file_name);
   if (!config_file.good()) {
-    printf ("Failed to open config file: %s\n", file_name);
+    printf("Failed to open config file: %s\n", file_name);
     return false;
   }
 

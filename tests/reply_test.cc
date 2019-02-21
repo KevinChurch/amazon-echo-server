@@ -1,8 +1,8 @@
-#include "gtest/gtest.h"
 #include "reply.h"
+#include "gtest/gtest.h"
 
 class ReplyTest : public ::testing::Test {
-protected:
+ protected:
   Reply resp;
   bool success;
 };
@@ -25,7 +25,6 @@ TEST_F(ReplyTest, Header) {
   resp.SetHeader("Content-Type", "text/plain");
   resp.SetHeader("My-Header", "some/value");
 
-
   EXPECT_EQ((resp.headers())["Content-Type"], "text/plain");
   EXPECT_EQ((resp.headers())["My-Header"], "some/value");
 }
@@ -42,7 +41,7 @@ TEST_F(ReplyTest, ToString) {
   resp.SetStatus(200);
   resp.SetHeader("Content-Type", "text/plain");
   resp.SetBody("This is my\nbody");
-  
+
   std::string expected = "HTTP/1.1 200 OK\r\n";
   expected += "Content-Type: text/plain\r\n";
   expected += "\r\n";
@@ -50,4 +49,3 @@ TEST_F(ReplyTest, ToString) {
 
   EXPECT_EQ(resp.ToString(), expected);
 }
-

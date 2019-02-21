@@ -1,9 +1,9 @@
-#include "gtest/gtest.h"
 #include "config_parser.h"
 #include "config_parser_exception.h"
+#include "gtest/gtest.h"
 
 class NginxConfigParserTest : public ::testing::Test {
-protected:
+ protected:
   NginxConfigParser parser;
   NginxConfig out_config;
   bool success;
@@ -30,7 +30,8 @@ TEST_F(NginxConfigParserTest, CommentConfigFile) {
 TEST_F(NginxConfigParserTest, ToString) {
   parser.Parse("example_config", &out_config);
 
-  EXPECT_EQ(out_config.ToString(0), "\
+  EXPECT_EQ(out_config.ToString(0),
+            "\
 port 80;\n\
 root ./;\n\
 handler static {\n\
@@ -56,7 +57,8 @@ handler status {\n\
   name status;\n\
 }\n");
 
-  EXPECT_EQ(out_config.ToString(1), "\
+  EXPECT_EQ(out_config.ToString(1),
+            "\
   port 80;\n\
   root ./;\n\
   handler static {\n\
@@ -132,7 +134,8 @@ TEST_F(NginxConfigParserTest, FindBlocks) {
   EXPECT_EQ(out_config.FindBlocks(vect1, blocks1).size(), 5);
   EXPECT_NE(out_config.FindBlocks(vect1, blocks1).size(), 0);
 
-  std::vector<std::string> locations = {"/static", "/static2", "/echo", "/", "/status"};
+  std::vector<std::string> locations = {"/static", "/static2", "/echo", "/",
+                                        "/status"};
   std::vector<NginxConfig*> configs = out_config.FindBlocks("handler");
   for (int i = 0; i < locations.size(); ++i) {
     EXPECT_EQ(configs[i]->Find("location"), locations[i]);
@@ -143,64 +146,73 @@ TEST_F(NginxConfigParserTest, FindBlocks) {
 TEST_F(NginxConfigParserTest, InvalidConfigStreamMissingSemicolon) {
   std::stringstream config_file_stream("key value");
 
-  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config),
+               ConfigParserException);
 }
 
 TEST_F(NginxConfigParserTest, InvalidConfigStreamSemicolon) {
   std::stringstream config_file_stream("server {};");
 
-  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config),
+               ConfigParserException);
 }
 
 TEST_F(NginxConfigParserTest, InvalidConfigStreamSingleQuote) {
   std::stringstream config_file_stream("key 'value;");
 
-  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config),
+               ConfigParserException);
 }
 
 TEST_F(NginxConfigParserTest, InvalidConfigStreamDoubleQuote) {
   std::stringstream config_file_stream("key \"value;");
 
-  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config),
+               ConfigParserException);
 }
 
 TEST_F(NginxConfigParserTest, InvalidConfigStreamBlocks) {
   std::stringstream config_file_stream("server {");
-  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config),
+               ConfigParserException);
 
   config_file_stream.clear();
   config_file_stream.str("server {{}}");
-  
-  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
-  
+
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config),
+               ConfigParserException);
+
   config_file_stream.clear();
   config_file_stream.str("server }");
 
-  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config),
+               ConfigParserException);
 
   config_file_stream.clear();
-  config_file_stream.str("\
+  config_file_stream.str(
+      "\
 http {\n\
   server {\n\
     listen   80;\n\
 }");
 
-  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config), ConfigParserException);
+  EXPECT_THROW(parser.Parse(&config_file_stream, &out_config),
+               ConfigParserException);
 }
 
 TEST_F(NginxConfigParserTest, ValidConfigStreamEmpty) {
   std::stringstream config_file_stream("");
   success = parser.Parse(&config_file_stream, &out_config);
-  
+
   EXPECT_TRUE(success);
 }
 
 TEST_F(NginxConfigParserTest, ValidConfigStreamComment) {
   std::stringstream config_file_stream(
-"key value;\n\
+      "key value;\n\
 #comment\n");
   success = parser.Parse(&config_file_stream, &out_config);
-  
+
   EXPECT_TRUE(success);
 }
 

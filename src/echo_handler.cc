@@ -1,14 +1,15 @@
 #include "echo_handler.h"
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
 #include "reply.h"
 #include "request.h"
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <sys/types.h>
-#include <sys/stat.h>
 
-EchoHandler* EchoHandler::create(const NginxConfig& config, const std::string& root_path) {
+EchoHandler* EchoHandler::create(const NginxConfig& config,
+                                 const std::string& root_path) {
   return new EchoHandler;
 }
 

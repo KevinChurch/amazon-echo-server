@@ -1,15 +1,16 @@
 #pragma once
 
 #include "handler.h"
-#include "request.h"
 #include "reply.h"
+#include "request.h"
 
-class StaticHandler: public Handler {
-public:
-  static StaticHandler* create(const NginxConfig& config, const std::string& root_path);
+class StaticHandler : public Handler {
+ public:
+  static StaticHandler* create(const NginxConfig& config,
+                               const std::string& root_path);
   std::unique_ptr<Reply> HandleRequest(const Request& request);
 
-private:
+ private:
   std::string uri_prefix;
   std::string path_prefix;
   std::string root_path;
