@@ -8,11 +8,17 @@
 #include "reply.h"
 #include "request.h"
 
+/**
+    config and root_path is not used but included to comply with interface.
+*/
 EchoHandler* EchoHandler::create(const NginxConfig& config,
                                  const std::string& root_path) {
   return new EchoHandler;
 }
 
+/**
+    HandleRequest echoes request by setting the original request as the response body.
+*/
 std::unique_ptr<Reply> EchoHandler::HandleRequest(const Request& request) {
   std::cout << "\nEchoHandler::HandleRequest" << std::endl;
   BOOST_LOG_SEV(my_logger::get(), INFO) << "\nEchoHandler::HandleRequest";
@@ -23,12 +29,3 @@ std::unique_ptr<Reply> EchoHandler::HandleRequest(const Request& request) {
   reply_ptr->SetBody(request.original_request());
   return reply_ptr;
 }
-
-// bool EchoHandler::HandleRequest(const Request& request, Reply* reply) {
-//     std::cout << "\nEchoHandler::HandleRequest" << std::endl;
-
-//     reply->SetStatus(200);
-//     reply->SetHeader("Content-Type", "text/plain");
-//     reply->SetBody(request.original_request());
-//     return true;
-// }
