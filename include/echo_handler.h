@@ -25,7 +25,4 @@ class EchoHandler : public Handler {
       @return a Reply unique pointer.
   */
   std::unique_ptr<Reply> HandleRequest(const Request& request);
-
- private:
-  std::string to_send;
 };

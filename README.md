@@ -35,7 +35,7 @@ make coverage
 docker build -f docker/base.Dockerfile -t amazon-echo-server:base .
 # Build docker image.
 docker build -f docker/Dockerfile -t my_image .
-# Run docker container. Example maps local port 8080 to container port 80. 
+# Run docker container. Example maps local port 8080 to container port 80.
 docker run --rm -p 127.0.0.1:8080:80 --name my_run my_image:latest
 # Stop docker container.
 docker container stop my_run
@@ -78,6 +78,8 @@ Steps to add a new handler.
 2. Create new handler class and inherit from `Handler.`
 3. Add handler to `handler_map_` object in `server.cc`.
 4. Create new handler tests.
+
+Refer to header files of handlers (ex. static_handler.h, status_handler.h, echo_handler.h) for examples
 
 ## Authors
 
