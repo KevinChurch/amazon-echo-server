@@ -25,7 +25,7 @@ void handler(const boost::system::error_code &error, int signal_number) {
 
 int main(int argc, char *argv[]) {
   try {
-    if (argc != 2) {
+    if (!(argc == 2 || argc == 3)) {
       std::cerr << "Usage: ./server <path to config file>\n";
       BOOST_LOG_SEV(my_logger::get(), ERROR)
           << "Wrong number of arguments were provided by the user";
@@ -36,11 +36,14 @@ int main(int argc, char *argv[]) {
 
     NginxConfigParser config_parser;
     NginxConfig config;
-    config_parser.Parse(argv[1], &config);
-
     boost::asio::io_service io_service;
-
+    std::size_t thread_pool_size = DEFAULT_THREAD_NUM;
+    
+    config_parser.Parse(argv[1], &config);
     unsigned short port = stoi(config.Find("port"));
+
+    if(argc == 3)
+      thread_pool_size = boost::lexical_cast<std::size_t>(argv[2]);
 
     BOOST_LOG_SEV(my_logger::get(), INFO)
         << "Successfully parsed a config file";
@@ -52,7 +55,9 @@ int main(int argc, char *argv[]) {
     // Start an asynchronous wait for one of the signals to occur.
     signals.async_wait(handler);
 
-    Server s(io_service, port, config);
+    Server s(io_service, port, config, thread_pool_size);
+
+    s.run();
 
     io_service.run();
   } catch (ConfigParserException &e) {

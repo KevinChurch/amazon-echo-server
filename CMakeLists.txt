@@ -46,6 +46,7 @@ target_link_libraries(server
       	Boost::system
       	Boost::log_setup
         Boost::log
+	Boost::thread
 )
 
 add_executable(config_parser_test tests/config_parser_test.cc)

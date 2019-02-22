@@ -46,7 +46,8 @@ docker container stop my_run
 Server can also be run via `docker run` command.
 ```bash
 # Must be ran in project root for now. Need to fix this bug.
-./build/bin/server <config_file>
+# Optionally, choose the number of threads allocated to the server.  Four threads are used by default.
+./build/bin/server <config_file> [num_of_threads]
 ```
 
 ## Tests
