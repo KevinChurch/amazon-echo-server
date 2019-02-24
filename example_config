@@ -50,3 +50,10 @@ handler status {
     location /status;
     name status;
 }
+
+handler reverse_proxy {
+    location /ucla;
+    host www.ucla.edu;
+    port 80;
+    name reverse_proxy;
+}
