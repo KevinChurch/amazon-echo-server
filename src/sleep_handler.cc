@@ -19,10 +19,10 @@ std::unique_ptr<Reply> SleepHandler::HandleRequest(const Request& request) {
   std::cout << "\nSleepHandler::HandleRequest" << std::endl;
   BOOST_LOG_SEV(my_logger::get(), INFO) << "\nSleepHandler::HandleRequest";
 
-  std::this_thread::sleep_for(std::chrono::seconds(10));
+  std::this_thread::sleep_for(std::chrono::seconds(5));
 
   std::unique_ptr<Reply> reply_ptr(new Reply());
-  std::string body = "Sleping 10 seconds...\r\n";
+  std::string body = "Sleping 5 seconds...\r\n";
   reply_ptr->SetStatus(200);
   reply_ptr->SetHeader("Content-Type", "text/plain");
   reply_ptr->SetBody(body);

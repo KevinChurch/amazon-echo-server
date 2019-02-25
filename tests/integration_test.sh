@@ -87,6 +87,23 @@ file_test() {
     rm $TEMP_FILE
 }
 
+# tests that server is multithreaded
+multithreaded_test() {
+    echo "curling localhost:8080/sleep"
+    curl -s localhost:8080/sleep &
+    SLEEP_PID=$!
+    echo "curling localhost:8080/echo"
+    curl -s localhost:8080/echo &
+    ECHO_PID=$!
+    wait $SLEEP_PID
+    if ! kill -0 $ECHO_PID; then
+        echo "pass"
+    else
+        echo "fail"
+        PASS=0
+    fi
+}
+
 
 # TESTS
 
@@ -113,6 +130,12 @@ OUTPUT=$'GET /echo HTTP/1.1\r\nHost: localhost:8080\r\nUser-Agent: curl/7.58.0\r
 OUTPUT=${OUTPUT%$'\n'} # Removes automatic newline added to end of variable.
 test_equal "$INPUT" "$OUTPUT"
 
+# Sleep Handler
+INPUT=`curl -s localhost:8080/sleep`
+OUTPUT=$'Sleping 5 seconds...\r\n'
+OUTPUT=${OUTPUT%$'\n'} # Removes automatic newline added to end of variable.
+test_equal "$INPUT" "$OUTPUT"
+
 # HTML Handler
 file_test "localhost:8080/static/index.html" "static/index.html"
 
@@ -121,6 +144,8 @@ file_test "localhost:8080/static/amazon.jpg" "static/amazon.jpg"
 
 # TXT Handler
 file_test "localhost:8080/static/amazon.txt" "static/amazon.txt"
+
+multithreaded_test
 
 kill_server
 
