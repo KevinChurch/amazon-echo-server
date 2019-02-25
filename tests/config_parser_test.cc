@@ -55,6 +55,16 @@ handler not_found {\n\
 handler status {\n\
   location /status;\n\
   name status;\n\
+}\n\
+handler reverse_proxy {\n\
+  location /ucla;\n\
+  host www.ucla.edu;\n\
+  port 80;\n\
+  name reverse_proxy;\n\
+}\n\
+handler sleep {\n\
+  location /sleep;\n\
+  name sleep;\n\
 }\n");
 
   EXPECT_EQ(out_config.ToString(1),
@@ -82,6 +92,16 @@ handler status {\n\
   handler status {\n\
     location /status;\n\
     name status;\n\
+  }\n\
+  handler reverse_proxy {\n\
+    location /ucla;\n\
+    host www.ucla.edu;\n\
+    port 80;\n\
+    name reverse_proxy;\n\
+  }\n\
+  handler sleep {\n\
+    location /sleep;\n\
+    name sleep;\n\
   }\n");
 }
 
@@ -121,17 +141,17 @@ TEST_F(NginxConfigParserTest, FindBlocks) {
   parser.Parse("example_config", &out_config);
 
   // FindBlocks with String
-  EXPECT_EQ(out_config.FindBlocks("handler").size(), 5);
+  EXPECT_EQ(out_config.FindBlocks("handler").size(), 7);
   EXPECT_NE(out_config.FindBlocks("handler").size(), 0);
 
   // FindBlocks with Vector
   std::vector<std::string> vect1 = {"handler"};
-  EXPECT_EQ(out_config.FindBlocks(vect1).size(), 5);
+  EXPECT_EQ(out_config.FindBlocks(vect1).size(), 7);
   EXPECT_NE(out_config.FindBlocks(vect1).size(), 0);
 
   // // FindBlocks with Vector and Value
   std::vector<NginxConfig*> blocks1;
-  EXPECT_EQ(out_config.FindBlocks(vect1, blocks1).size(), 5);
+  EXPECT_EQ(out_config.FindBlocks(vect1, blocks1).size(), 7);
   EXPECT_NE(out_config.FindBlocks(vect1, blocks1).size(), 0);
 
   std::vector<std::string> locations = {"/static", "/static2", "/echo", "/",

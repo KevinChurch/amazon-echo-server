@@ -8,6 +8,7 @@
 #include "static_handler.h"
 #include "status_handler.h"
 #include "reverse_proxy_handler.h"
+#include "sleep_handler.h"
 
 // Registration mechanism. Your server must have a delegate class
 // which takes care of registering creation factories for handlers.
@@ -38,6 +39,8 @@ std::unique_ptr<Handler> HandlerManager::createByName(
     handler_ptr.reset(NotFoundHandler::create(config, root_path));
   } else if (name == "reverse_proxy") {
     handler_ptr.reset(ReverseProxyHandler::create(config, root_path));
+  } else if (name == "sleep") {
+    handler_ptr.reset(SleepHandler::create(config, root_path));
   } else if (name == "status") {
     // handler_ptr.reset(StatusHandler::create(config, root_path));
     StatusHandler* st_handler = StatusHandler::create(config, root_path);
