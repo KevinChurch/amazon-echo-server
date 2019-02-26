@@ -59,11 +59,47 @@ std::unique_ptr<Reply> ReverseProxyHandler::HandleRequest(const Request& request
   std::string response(boost::asio::buffers_begin(read_buf.data()),
     boost::asio::buffers_begin(read_buf.data()) + bytes_transferred);
 
-  // TODO (leilaomar): change header type/refactor GetContentType to base class and use it here
-  reply_ptr->SetStatus(200);
-  reply_ptr->SetHeader("Content-Type", "text/plain");
-  // TODO (leilaomar): get headers from response and only use the body for SetBody
-  reply_ptr->SetBody(response);
+  // redirect mappings in html files to /uri_prefix/map
+  boost::replace_all(response, "href=\"/", "href=\"" + this->uri_prefix + "/");
+  boost::replace_all(response, "src=\"/", "src=\"" + this->uri_prefix + "/");
+
+  // css style
+  boost::replace_all(response, "url(/", "url(" + this->uri_prefix + "/");
+  boost::replace_all(response, "src='", "src='" + this->uri_prefix + "/");
+
+  // find the start of the body
+  // NOTE: this is under the assumption that the response contains carriage returns
+  size_t start = response.find("\r\n\r\n");
+
+  int status = GetStatus(response);
+  reply_ptr->SetStatus(status);
+
+  // TODO (leilaomar or johnstucky): fix the weird address and zero character at the
+  // start and end of the body respectively
+  std::string body = GetBody(response, start);
+  reply_ptr->SetBody(body);
+  
+  std::map<std::string, std::string> m_headers = GetHeaders(response, start);
+  for (auto it = m_headers.begin(); it != m_headers.end(); it++) {
+    // it->first is the key (header name)
+    // it->second is the value
+    if (it->first == "Content-Type") {
+      /** There's some weird bug that occurs if this accepts all headers (i.e. no if statement)
+       * Output when typing localhost:8080/ucla/ in the browser (just like w/ the static handler in the local browser):
+       *    Invalid method request!
+       *    HTTP Version not support!
+       *    Segmentation fault (core dumped)
+       */
+      reply_ptr->SetHeader(it->first, it->second);
+    } else if (it->first == "Location") {
+      // TODO (leilaomar or johnstucky): fix redirect w/ status 301/302 by modifying the location
+      BOOST_LOG_SEV(my_logger::get(), INFO) << "Redirect " << request.uri() << " to " << it->second;
+      auto req = request;
+      req.set_uri(it->second);
+      return HandleRequest(req);
+    }
+  }
+
   return reply_ptr;
 }
 
@@ -76,6 +112,42 @@ std::string ReverseProxyHandler::GetPath(std::string url) {
     path = "/";
   }
   return path;
+}
+
+int ReverseProxyHandler::GetStatus(const std::string& resp) {
+  // get the positions of the first and second space
+  // this is under the assumption that the http version is always first in an http response
+  size_t start = resp.find(" ");
+  size_t end = resp.find(" ", start + 1);
+  if (end != std::string::npos) {
+    std::string str(resp.begin() + start + 1, resp.begin() + end);
+    return stoi(str);
+  }
+  // bad request
+  return 400;
+}
+
+std::map<std::string, std::string> ReverseProxyHandler::GetHeaders(const std::string& resp, const size_t& start) {
+  std::vector<std::string> result;
+  std::map<std::string, std::string> headers;
+  std::string str = resp.substr(0, start);
+  boost::split(result, str, boost::is_any_of("\r\n"));
+  for (int i = 0; i < result.size(); i++) {
+    size_t pos = result[i].find(":");
+    if (pos != std::string::npos) {
+      // 2 represents the number of bytes in ": "
+      // e.g. result[i] = "Content-Type: text/plain" -> headers[Content-Type] = text/plain
+      headers[result[i].substr(0, pos)] = result[i].substr(pos + 2);
+    }
+  }
+  return headers;
+}
+
+std::string ReverseProxyHandler::GetBody(const std::string& resp, const size_t& start) {
+  if (start != std::string::npos) {
+    return resp.substr(start + strlen("\r\n\r\n"));
+  }
+  return "";
 }
 
 boost::asio::ip::tcp::resolver::iterator ReverseProxyHandler::ResolveHost(boost::system::error_code& ec) {

@@ -11,6 +11,7 @@ class Request {
   std::string original_request() const;
   std::string method() const;
   std::string uri() const;
+  void set_uri(std::string url);
   std::string version() const;
 
   // we are using headers and body in response.cc file, I will delete this

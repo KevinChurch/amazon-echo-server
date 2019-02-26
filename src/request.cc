@@ -79,6 +79,8 @@ std::string Request::method() const { return m_method; }
 
 std::string Request::uri() const { return m_uri; }
 
+void Request::set_uri(std::string url) { m_uri = url; }
+
 std::string Request::version() const { return m_version; }
 
 /*	we are using headers and body in response.cc file, I will delete this

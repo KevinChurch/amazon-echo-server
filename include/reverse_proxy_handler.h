@@ -46,6 +46,31 @@ class ReverseProxyHandler : public Handler {
   */
   std::string GetPath(std::string url);
   /**
+      Given an http response, get the status portion of the message
+
+      @param resp the full http response from the host
+      @return status code of response
+  */
+  int GetStatus(const std::string& resp);
+  /**
+      Given an http response, get the body portion of the message
+
+      @param resp the full http response from the host
+      @param start represents the start of the body (which is the last position this function
+             wants to consider)
+      @return body of the response
+  */
+  std::map<std::string, std::string> GetHeaders(const std::string& resp, const size_t& start);
+  /**
+      Given an http response, get the body portion of the message
+
+      @param resp the full http response from the host
+      @param start represents the start of the body (which is near the first position this
+             function wants to consider)
+      @return body of the response
+  */
+  std::string GetBody(const std::string& resp, const size_t& start);
+  /**
       Given a config block and the root path of the server, initialize data members
 
       @param config config block of requested handler
