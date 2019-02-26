@@ -88,6 +88,7 @@ file_test() {
 }
 
 # tests that server is multithreaded
+# TODO: Consider improving test by verifying that curl commands are successful.
 multithreaded_test() {
     echo "curling localhost:8080/sleep"
     curl -s localhost:8080/sleep &
