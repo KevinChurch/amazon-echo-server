@@ -49,6 +49,8 @@ std::unique_ptr<Handler> HandlerManager::createByName(
     handler_ptr.reset(st_handler);
     // delete st_handler;
   }
+  // Potential TODO: handle a default case where the name is missing/wrong.
+  // currently it creates a segmentation fault
 
   return handler_ptr;
 }
