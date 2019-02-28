@@ -1,6 +1,6 @@
 # Non-documented server attributes can be called whatever you want. Like
 # “port” or “listen” etc.
-port 8080;
+port 8081;
 
 # The server root must be called “root” and must be interpreted as an
 # absolute path.

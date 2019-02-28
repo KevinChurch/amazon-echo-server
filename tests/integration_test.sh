@@ -36,10 +36,33 @@ run_server() {
     sleep 3
 }
 
+# starts backend server
+run_backend_server() {
+    if [ -d "$BUILD" ]; then
+        echo "build/bin/server dev_backend_config &"
+        build/bin/server dev_backend_config &
+    elif [ -d "$BUILD_COVERAGE" ]; then
+        echo "build_coverage/bin/server dev_backend_config &"
+        build_coverage/bin/server dev_backend_config &
+    else
+        exit 1
+    fi
+    SERVER_BACKEND_PID=$!
+    # TODO: Figure out how to make the rest of the script wait 
+    # for the server to stat up instead of usign sleep. 
+    sleep 3
+}
+
 # kills server
 kill_server() {
     echo "kill -9 $SERVER_PID"
     kill -9 "$SERVER_PID"
+}
+
+# kills backend server
+kill_backend_server() {
+    echo "kill -9 $SERVER_BACKEND_PID"
+    kill -9 "$SERVER_BACKEND_PID"
 }
 
 # tests string equality
@@ -145,6 +168,10 @@ file_test "localhost:8080/static/amazon.jpg" "static/amazon.jpg"
 
 # TXT Handler
 file_test "localhost:8080/static/amazon.txt" "static/amazon.txt"
+
+run_backend_server
+file_test "localhost:8080/ucla/static/amazon.txt" "static/amazon.txt"
+kill_backend_server
 
 multithreaded_test
 
