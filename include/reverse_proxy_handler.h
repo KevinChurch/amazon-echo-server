@@ -38,6 +38,21 @@ class ReverseProxyHandler : public Handler {
   // extra server port number
   std::string port_name;
   /**
+      Given a hostname, remove http:// or https:// if it is specified
+
+      @param hostname the host address you wish to connect to
+      @return new hostname without the http://
+  */
+  void RemoveHTTPProtocol(std::string& hostname);
+  /**
+      Given a new location of the request, change the host name and return the
+      appending path
+
+      @param new_location the location specified in HTTP 301/302 redirects
+      @return new path after the hostname
+  */
+  std::string GetNewHostAndPath(const std::string& new_location);
+  /**
       Given a url received from request, get a file path to a static file
       requested by client
 
@@ -53,14 +68,25 @@ class ReverseProxyHandler : public Handler {
   */
   int GetStatus(const std::string& resp);
   /**
-      Given an http response, get the body portion of the message
+      Given an http response, get the header portion of the message
 
       @param resp the full http response from the host
       @param start represents the start of the body (which is the last position this function
              wants to consider)
-      @return body of the response
+      @return map of the headers [header name, header value]
   */
   std::map<std::string, std::string> GetHeaders(const std::string& resp, const size_t& start);
+  /**
+      Set the header portion of the message in the reply smart pointer
+
+      @param rep the reply
+      @param headers the mapping of headers [header name, header value]
+      @param request the original http request
+      @return the updated reply object with additional headers added
+  */
+  std::unique_ptr<Reply> SetHeaders(std::unique_ptr<Reply> rep,
+                                    const std::map<std::string, std::string>& headers,
+                                    const Request& request);
   /**
       Given an http response, get the body portion of the message
 
@@ -78,6 +104,14 @@ class ReverseProxyHandler : public Handler {
       @return true if succeeed, false otherwise
   */
   bool Init(const NginxConfig& config, const std::string& root_path);
+  /**
+      Given an HTML response, change mappings (e.g. /img/foo.jpg) to include the
+      uri prefix (e.g. /ucla/img/foo.jpg)
+
+      @param resp the http response that will be modified
+      @return void
+  */  
+  void RedirectHTMLMaps(std::string& resp);
   /**
       Given a config block and the root path of the server, initialize data members
 

@@ -14,6 +14,9 @@ bool ReverseProxyHandler::Init(const NginxConfig& config,
   this->host_name = config.Find("host");
   this->port_name = config.Find("port");
 
+  // remove http:// or https:// from the host name if it exists
+  RemoveHTTPProtocol(this->host_name);
+
   BOOST_LOG_SEV(my_logger::get(), TRACE) << "[Reverse Proxy] root path: " << this->root_path
     << ", location: " << this->uri_prefix
     << ", host: " << this->host_name
@@ -22,6 +25,13 @@ bool ReverseProxyHandler::Init(const NginxConfig& config,
   return true;
 }
 
+/** This function modifies the given request
+ * connects to the desired HTTP server
+ * sends the modified request to the server
+ * reads through the socket for the response
+ * sets the reply_ptr status/headers/body based off of the response
+ * NOTE: this has issues with connecting to https servers (e.g. port 443)
+ */
 std::unique_ptr<Reply> ReverseProxyHandler::HandleRequest(const Request& request) {
   BOOST_LOG_SEV(my_logger::get(), INFO) << "ReverseProxyHandler::HandleRequest";
 
@@ -59,13 +69,7 @@ std::unique_ptr<Reply> ReverseProxyHandler::HandleRequest(const Request& request
   std::string response(boost::asio::buffers_begin(read_buf.data()),
     boost::asio::buffers_begin(read_buf.data()) + bytes_transferred);
 
-  // redirect mappings in html files to /uri_prefix/map
-  boost::replace_all(response, "href=\"/", "href=\"" + this->uri_prefix + "/");
-  boost::replace_all(response, "src=\"/", "src=\"" + this->uri_prefix + "/");
-
-  // css style
-  boost::replace_all(response, "url(/", "url(" + this->uri_prefix + "/");
-  boost::replace_all(response, "src='", "src='" + this->uri_prefix + "/");
+  RedirectHTMLMaps(response);
 
   // find the start of the body
   // NOTE: this is under the assumption that the response contains carriage returns
@@ -80,27 +84,25 @@ std::unique_ptr<Reply> ReverseProxyHandler::HandleRequest(const Request& request
   reply_ptr->SetBody(body);
   
   std::map<std::string, std::string> m_headers = GetHeaders(response, start);
-  for (auto it = m_headers.begin(); it != m_headers.end(); it++) {
-    // it->first is the key (header name)
-    // it->second is the value
-    if (it->first == "Content-Type") {
-      /** There's some weird bug that occurs if this accepts all headers (i.e. no if statement)
-       * Output when typing localhost:8080/ucla/ in the browser (just like w/ the static handler in the local browser):
-       *    Invalid method request!
-       *    HTTP Version not support!
-       *    Segmentation fault (core dumped)
-       */
-      reply_ptr->SetHeader(it->first, it->second);
-    } else if (it->first == "Location") {
-      // TODO (leilaomar or johnstucky): fix redirect w/ status 301/302 by modifying the location
-      BOOST_LOG_SEV(my_logger::get(), INFO) << "Redirect " << request.uri() << " to " << it->second;
-      auto req = request;
-      req.set_uri(it->second);
-      return HandleRequest(req);
-    }
-  }
+  reply_ptr = SetHeaders(std::move(reply_ptr), m_headers, request);
 
   return reply_ptr;
+}
+
+void ReverseProxyHandler::RemoveHTTPProtocol(std::string& hostname) {
+  // perform on both http:// and https://
+  size_t pos = hostname.find("http://");
+  if (pos != std::string::npos) {
+    hostname = hostname.substr(pos + strlen("http://"));
+  } else {
+    pos = hostname.find("https://");
+    if (pos != std::string::npos) {
+      hostname = hostname.substr(pos + strlen("https://"));
+      // NOTE: this causes the warning `overflow in implicit constant conversion'
+      // in case it redirects to https, change the port
+      // this->port_name = 443;
+    }
+  }
 }
 
 std::string ReverseProxyHandler::GetPath(std::string url) {
@@ -148,6 +150,59 @@ std::string ReverseProxyHandler::GetBody(const std::string& resp, const size_t& 
     return resp.substr(start + strlen("\r\n\r\n"));
   }
   return "";
+}
+
+std::unique_ptr<Reply> ReverseProxyHandler::SetHeaders(std::unique_ptr<Reply> rep,
+                                                       const std::map<std::string, std::string>& headers,
+                                                       const Request& request) {
+  for (auto it = headers.begin(); it != headers.end(); it++) {
+    // it->first is the key (header name)
+    // it->second is the value
+    if (it->first == "Content-Type") {
+      /** There's some weird bug that occurs if this accepts all headers (i.e. no if statement)
+       * Output when typing localhost:8080/ucla/ in the browser (just like w/ the static handler in the local browser):
+       *    Invalid method request!
+       *    HTTP Version not support!
+       *    Segmentation fault (core dumped)
+       */
+      rep->SetHeader(it->first, it->second);
+    } else if (it->first == "Location") {
+      BOOST_LOG_SEV(my_logger::get(), INFO) << "Redirect " << this->host_name  << GetPath(request.uri())
+                                            << " to " << it->second;
+
+      std::string path = GetNewHostAndPath(it->second);
+      auto req = request;
+      req.set_uri(path);
+
+      return HandleRequest(req);
+    }
+  }
+  return rep;
+}
+
+std::string ReverseProxyHandler::GetNewHostAndPath(const std::string& new_location) {
+  this->host_name = new_location;
+  RemoveHTTPProtocol(this->host_name);
+
+  // '/' is not a valid character in a host name, so that is the start of the path
+  size_t pos = this->host_name.find("/");
+  std::string suffix;
+  if (pos != std::string::npos) {
+    suffix = this->host_name.substr(pos);
+    this->host_name = this->host_name.substr(0, pos);
+  }
+  // return the path
+  return this->uri_prefix + suffix;
+}
+
+void ReverseProxyHandler::RedirectHTMLMaps(std::string& resp) {
+  // redirect mappings in html files to /uri_prefix/map
+  boost::replace_all(resp, "href=\"/", "href=\"" + this->uri_prefix + "/");
+  boost::replace_all(resp, "src=\"/", "src=\"" + this->uri_prefix + "/");
+
+  // css style
+  boost::replace_all(resp, "url(/", "url(" + this->uri_prefix + "/");
+  boost::replace_all(resp, "src='", "src='" + this->uri_prefix + "/");
 }
 
 boost::asio::ip::tcp::resolver::iterator ReverseProxyHandler::ResolveHost(boost::system::error_code& ec) {
