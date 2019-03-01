@@ -57,5 +57,6 @@ static - /static\n\
 static - /static2\n\
 echo - /echo\n\
 not_found - /\n\
-status - /status\n");
+status - /status\n\
+reverse_proxy - /local\n");
 }

@@ -1,6 +1,6 @@
 # Non-documented server attributes can be called whatever you want. Like
 # “port” or “listen” etc.
-port 80;
+port 8080;
 
 # The server root must be called “root” and must be interpreted as an
 # absolute path.
@@ -49,4 +49,11 @@ handler not_found {
 handler status {
     location /status;
     name status;
+}
+
+handler reverse_proxy {
+    location /local;
+    host localhost;
+    port 8080;
+    name reverse_proxy;
 }

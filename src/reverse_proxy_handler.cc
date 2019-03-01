@@ -17,11 +17,6 @@ bool ReverseProxyHandler::Init(const NginxConfig& config,
   // remove http:// or https:// from the host name if it exists
   RemoveHTTPProtocol(this->host_name);
 
-  BOOST_LOG_SEV(my_logger::get(), TRACE) << "[Reverse Proxy] root path: " << this->root_path
-    << ", location: " << this->uri_prefix
-    << ", host: " << this->host_name
-    << ", port: " << this->port_name;
-
   return true;
 }
 
@@ -34,11 +29,15 @@ bool ReverseProxyHandler::Init(const NginxConfig& config,
  */
 std::unique_ptr<Reply> ReverseProxyHandler::HandleRequest(const Request& request) {
   BOOST_LOG_SEV(my_logger::get(), INFO) << "ReverseProxyHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), TRACE) << "[Reverse Proxy] root path: " << this->root_path
+    << ", location: " << this->uri_prefix
+    << ", host: " << this->host_name
+    << ", port: " << this->port_name;
 
   std::unique_ptr<Reply> reply_ptr(new Reply());
   // remove the uri prefix from the request and issue it to a new response
   std::string resp_string = request.method() + " " + GetPath(request.uri()) + " HTTP/1.1\r\nHost: "
-    + this->host_name + "\r\nConnection: close\r\n\r\n";
+    + this->host_name + "\r\nAccept-Encoding: utf-8\r\nConnection: close\r\n\r\n";
   boost::asio::streambuf resp;
   std::ostream resp_stream(&resp);
   resp_stream << resp_string;
@@ -78,8 +77,9 @@ std::unique_ptr<Reply> ReverseProxyHandler::HandleRequest(const Request& request
   int status = GetStatus(response);
   reply_ptr->SetStatus(status);
 
-  // TODO (leilaomar or johnstucky): fix the weird address and zero character at the
-  // start and end of the body respectively
+  // NOTE: it seems like www.ucla.edu is some exception where there will be some random
+  // hexadecimal string (e.g. 00637e) at the top of the body, and '0' at the end of it
+  // Maybe it is worth hardcoding a fix?
   std::string body = GetBody(response, start);
   reply_ptr->SetBody(body);
   
@@ -98,9 +98,8 @@ void ReverseProxyHandler::RemoveHTTPProtocol(std::string& hostname) {
     pos = hostname.find("https://");
     if (pos != std::string::npos) {
       hostname = hostname.substr(pos + strlen("https://"));
-      // NOTE: this causes the warning `overflow in implicit constant conversion'
       // in case it redirects to https, change the port
-      // this->port_name = 443;
+      this->port_name = "443";
     }
   }
 }

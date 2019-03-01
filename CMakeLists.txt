@@ -80,6 +80,9 @@ target_link_libraries(not_found_handler_test request_lib logging_lib reply_lib c
 add_executable(status_handler_test tests/status_handler_test.cc)
 target_link_libraries(status_handler_test request_lib logging_lib reply_lib config_parser_lib handler_lib gtest_main Boost::system Boost::log)
 
+add_executable(reverse_proxy_handler_test tests/reverse_proxy_handler_test.cc)
+target_link_libraries(reverse_proxy_handler_test request_lib logging_lib reply_lib config_parser_lib handler_lib gtest_main Boost::system Boost::log)
+
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(reply_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(request_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -87,9 +90,10 @@ gtest_discover_tests(session_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
 gtest_discover_tests(echo_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(not_found_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(status_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(reverse_proxy_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS server config_parser_lib request_lib reply_lib session_lib handler_lib logging_lib TESTS config_parser_test request_test reply_test session_test echo_handler_test not_found_handler_test status_handler_test)
+generate_coverage_report(TARGETS server config_parser_lib request_lib reply_lib session_lib handler_lib logging_lib TESTS config_parser_test request_test reply_test session_test echo_handler_test not_found_handler_test status_handler_test reverse_proxy_handler_test)
 
 
 add_test(NAME INTEGRATION_TEST COMMAND integration_test.sh WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
