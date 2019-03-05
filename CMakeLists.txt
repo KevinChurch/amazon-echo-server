@@ -43,6 +43,7 @@ add_library(handler_lib
   src/handler_manager.cc
 )
 add_library(logging_lib src/logging.cc)
+add_library(database_lib src/database.cc)
 
 add_executable(server src/server_main.cc src/session.cc)
 target_link_libraries(server
@@ -53,10 +54,12 @@ target_link_libraries(server
         reply_lib
       	handler_lib
         logging_lib
-      	Boost::system
+	database_lib
+	Boost::system
       	Boost::log_setup
         Boost::log
 	Boost::thread
+	sqlite3
 )
 
 add_executable(config_parser_test tests/config_parser_test.cc)

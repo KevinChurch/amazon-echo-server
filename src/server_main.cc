@@ -12,6 +12,7 @@
 #include "config_parser_exception.h"
 #include "logging.h"
 #include "server.h"
+#include "database.h"
 
 using boost::asio::ip::tcp;
 
@@ -38,6 +39,7 @@ int main(int argc, char *argv[]) {
     NginxConfig config;
     boost::asio::io_service io_service;
     std::size_t thread_pool_size = DEFAULT_THREAD_NUM;
+    Database db;
     
     config_parser.Parse(argv[1], &config);
     unsigned short port = stoi(config.Find("port"));
@@ -55,6 +57,9 @@ int main(int argc, char *argv[]) {
     // Start an asynchronous wait for one of the signals to occur.
     signals.async_wait(handler);
 
+    //Initilize Database
+    db.Init();
+    
     Server s(io_service, port, config, thread_pool_size);
 
     s.run();
