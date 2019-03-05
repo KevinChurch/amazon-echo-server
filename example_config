@@ -62,3 +62,9 @@ handler sleep {
     location /sleep;
     name sleep;
 }
+
+handler meme {
+    location /meme;
+    root /meme;
+    name meme;
+}
