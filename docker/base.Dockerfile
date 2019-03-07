@@ -13,4 +13,6 @@ RUN apt-get update && apt-get install -y \
     libboost-signals-dev \
     libboost-system-dev \
     libgtest-dev \
-    netcat
+    libsqlite3-dev \
+    netcat \
+    sqlite3
