@@ -66,5 +66,5 @@ private:
 
      @return a vector of meme ids
   */
-  std::vector<unit8_t> listMeme();
+  std::vector<uint8_t> listMeme();
 };
