@@ -1,5 +1,6 @@
 #include "html_builder.h"
 #include <fstream>
+#include <iostream>
 #include <streambuf>
 
 HtmlBuilder::HtmlBuilder() {}
@@ -10,15 +11,65 @@ HtmlBuilder::HtmlBuilder(std::string file_path) {
                      std::istreambuf_iterator<char>());
 }
 
-HtmlBuilder::~HtmlBuilder() {}
-
 std::string HtmlBuilder::getHtml() { return html; }
 
-bool HtmlBuilder::inject(std::string original, std::string replacement) {
-    size_t pos = html.find(original);
-    bool result = (pos != std::string::npos);
-    if (result) {
-        html.replace(pos, original.length(), replacement);
+void HtmlBuilder::inject(std::string original, std::string replacement) {
+  std::string marker = generateMarker(original);
+
+  size_t pos = html.find(marker);
+  if (pos != std::string::npos) {
+    html.replace(pos, marker.length(), replacement);
+  }
+}
+
+void HtmlBuilder::inject(std::vector<std::string> originals,
+                         std::vector<std::string> replacements) {
+  if (originals.size() == replacements.size()) {
+    int length = originals.size();
+    for (int i = 0; i < length; ++i) {
+      inject(originals[i], replacements[i]);
     }
-    return result;
+  }
+}
+
+void HtmlBuilder::inject(std::vector<std::string> originals,
+                         std::vector<std::vector<std::string>> replacements) {
+  std::string tHtmls;
+  if (!replacements.empty() && (originals.size() == replacements[0].size())) {
+    int length = replacements.size();
+    for (int i = 0; i < length; ++i) {
+      std::string tHtml = html;
+      shallowInject(tHtml, originals, replacements[i]);
+      if (i) {
+        tHtml = "\n" + tHtml;
+      }
+      tHtmls.append(tHtml);
+    }
+  }
+  html = tHtmls;
+}
+
+void HtmlBuilder::shallowInject(std::string &tHtml, std::string original,
+                                std::string replacement) {
+  std::string marker = generateMarker(original);
+
+  size_t pos = tHtml.find(marker);
+  if (pos != std::string::npos) {
+    tHtml.replace(pos, marker.length(), replacement);
+  }
+}
+
+void HtmlBuilder::shallowInject(std::string &tHtml,
+                                std::vector<std::string> originals,
+                                std::vector<std::string> replacements) {
+  if (originals.size() == replacements.size()) {
+    int length = originals.size();
+    for (int i = 0; i < length; ++i) {
+      shallowInject(tHtml, originals[i], replacements[i]);
+    }
+  }
+}
+
+std::string HtmlBuilder::generateMarker(std::string input) {
+  return "<!-- " + input + " -->";
 }
