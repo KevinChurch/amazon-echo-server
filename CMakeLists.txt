@@ -31,6 +31,7 @@ add_library(server_lib src/server.cc)
 add_library(reply_lib src/reply.cc)
 add_library(request_lib src/request.cc)
 add_library(session_lib src/session.cc)
+add_library(html_builder_lib src/html_builder.cc)
 add_library(handler_lib
   src/echo_handler.cc
   src/static_handler.cc
@@ -86,6 +87,9 @@ target_link_libraries(status_handler_test request_lib logging_lib reply_lib conf
 add_executable(reverse_proxy_handler_test tests/reverse_proxy_handler_test.cc)
 target_link_libraries(reverse_proxy_handler_test request_lib logging_lib reply_lib config_parser_lib handler_lib gtest_main Boost::system Boost::log)
 
+add_executable(html_builder_test tests/html_builder_test.cc)
+target_link_libraries(html_builder_test html_builder_lib gtest_main)
+
 gtest_discover_tests(config_parser_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(reply_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(request_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -94,9 +98,10 @@ gtest_discover_tests(echo_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_
 gtest_discover_tests(not_found_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(status_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 gtest_discover_tests(reverse_proxy_handler_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+gtest_discover_tests(html_builder_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
 include(cmake/CodeCoverageReportConfig.cmake)
-generate_coverage_report(TARGETS server config_parser_lib request_lib reply_lib session_lib handler_lib logging_lib TESTS config_parser_test request_test reply_test session_test echo_handler_test not_found_handler_test status_handler_test reverse_proxy_handler_test)
+generate_coverage_report(TARGETS server config_parser_lib request_lib reply_lib session_lib handler_lib logging_lib html_builder_lib TESTS config_parser_test request_test reply_test session_test echo_handler_test not_found_handler_test status_handler_test reverse_proxy_handler_test html_builder_test)
 
 
 add_test(NAME INTEGRATION_TEST COMMAND integration_test.sh WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests)
