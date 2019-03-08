@@ -10,10 +10,10 @@ class Database {
  public:
   
   void Init(void);
-  Meme* GetMeme(uint8_t id) const;
-  std::vector<Meme*> GetAllMemes() const;
+  Meme GetMeme(uint32_t id) const;
+  std::vector<Meme> GetAllMemes() const;
 
-  uint8_t AddMeme(uint8_t template_id, std::string top_text, std::string bottom_text);
+  uint32_t AddMeme(uint32_t template_id, std::string top_text, std::string bottom_text);
 
  private:
 

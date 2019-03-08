@@ -24,6 +24,9 @@ set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.50 REQUIRED COMPONENTS system log)
 message(STATUS "Boost version: ${Boost_VERSION}")
 
+LIST (APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+find_package (SQLite3 REQUIRED)
+
 include_directories(include)
 
 add_library(config_parser_lib src/config_parser.cc src/config_parser_exception.cc)
