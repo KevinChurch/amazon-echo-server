@@ -42,6 +42,7 @@ add_library(handler_lib
   src/status_handler.cc
   src/sleep_handler.cc
   src/reverse_proxy_handler.cc
+  src/meme_handler.cc
   src/request.cc
   src/reply.cc
   src/handler_manager.cc
