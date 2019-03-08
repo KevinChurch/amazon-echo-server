@@ -1,0 +1,38 @@
+#main-container {
+    margin: 2rem 0;
+}
+
+.container {
+    margin-top: 2rem;
+}
+
+.meme-container {
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.meme-img-container {
+    position: relative;
+}
+
+.meme-img-container .meme-top,
+.meme-img-container .meme-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.meme-img-container img {
+    width: 500px;
+}
+
+.meme-img-container .meme-top {
+    top: 1rem;
+}
+
+.meme-img-container .meme-bottom {
+    bottom: 1rem;
+}
+
