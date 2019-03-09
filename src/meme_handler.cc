@@ -5,6 +5,7 @@
 
 MemeHandler* MemeHandler::create(const NginxConfig& config,
                                  const std::string& root_path) {
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "Creating a MemeHandler";
   MemeHandler* handler = new MemeHandler;
   handler->Init(config, root_path);
   return handler;
@@ -26,7 +27,7 @@ bool MemeHandler::Init(const NginxConfig& config,
   return true;
 }
 
-std::unique_ptr<Database> InitDatabase() {
+std::unique_ptr<Database> MemeHandler::InitDatabase() {
   std::unique_ptr<Database> db(new Database());
 
   return db;
@@ -38,11 +39,14 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
 
   std::unique_ptr<Reply> reply_ptr(new Reply());
   std::string request_uri = request.uri();
+  BOOST_LOG_SEV(my_logger::get(), DEBUG) << request_uri;
   std::string action_str = request_uri.substr(this->uri_prefix.length());
   std::string params_str;
   std::string file_path;
   std::string body;
   std::map<std::string, std::string> params;
+
+  BOOST_LOG_SEV(my_logger::get(), DEBUG) << action_str;
 
   size_t pos = action_str.find("/");
   if (pos == std::string::npos) {
@@ -50,16 +54,24 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     return nullptr;
   }
   else {
-    action_str = request_uri.substr(pos+1);
+    action_str = action_str.substr(pos+1);
   }
 
   pos = action_str.find("?");
+  BOOST_LOG_SEV(my_logger::get(), DEBUG) << action_str;
+  BOOST_LOG_SEV(my_logger::get(), DEBUG) << std::to_string(pos);
   if(pos != std::string::npos) {
-    action_str = action_str.substr(0,pos);
+    BOOST_LOG_SEV(my_logger::get(), DEBUG) << "INSIDE!";
     params_str = action_str.substr(pos+1);
+    action_str = action_str.substr(0,pos);
+
   }
 
+  BOOST_LOG_SEV(my_logger::get(), DEBUG) << params_str;
+  BOOST_LOG_SEV(my_logger::get(), DEBUG) << action_str;
+
   if (action_str == "new") {
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/new";
     // get content of /static/memes/assets/new.html
     file_path = "/static/memes/new.html";
     body = ReadFromFile(file_path);
@@ -67,6 +79,7 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
   reply_ptr->SetBody(body);
   }
   else if (action_str == "create") {
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/create";
     // check if the method is POST
     if (request.method() != "POST") {
       BOOST_LOG_SEV(my_logger::get(), ERROR) << "Not a valid method for request to /memem/create";
@@ -85,6 +98,7 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     return HandleRequest(req);
   }
   else if (action_str == "view") {
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/view";
     // parse params from params_str
     size_t pos = body.find("=");
     while (pos != std::string::npos) {
@@ -111,6 +125,7 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     reply_ptr->SetBody(showBuilder.getHtml());
   }
   else if (action_str == "list") {
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/list";
     std::vector<std::map<std::string, std::string>> memes = viewMemes();
     HtmlBuilder partialBuilder("/static/memes/partials/_meme.html");
     HtmlBuilder indexBuilder("/static/memes/index.html");
@@ -156,9 +171,9 @@ std::string MemeHandler::newMeme(){
 std::map<std::string, std::string> MemeHandler::createMeme(const uint32_t template_id,
                                                  std::string& top_text,
                                                  std::string& bottom_text){
-  database->AddMeme(template_id, top_text, bottom_text);
+  uint32_t meme_id = database->AddMeme(template_id, top_text, bottom_text);
   // TODO: fix this meme_id to get the meme_id from a newly created meme
-  uint32_t meme_id = 0;
+  // uint32_t meme_id = 0;
 
   // TODO: implement redirection to meme/view after redirection
   return viewMeme(meme_id);
@@ -191,7 +206,7 @@ std::vector<std::map<std::string, std::string>> MemeHandler::viewMemes() {
     meme_map["meme_id"] = std::to_string(meme.meme_id);
     meme_map["template_id"] = std::to_string(meme.template_id);
     meme_map["top_text"] = meme.top_text;
-    meme_map["bottom_text"] = meme.bottom_text;    
+    meme_map["bottom_text"] = meme.bottom_text;
     memes.push_back(meme_map);
   }
 

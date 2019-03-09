@@ -46,6 +46,8 @@ void Session::start() {
 }
 
 int Session::handle_request() {
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "Handling request";
+
   auto request = Request::ParseRequest(get_message_request());
   std::string s = socket_.remote_endpoint().address().to_string();
   std::string original_url = request->uri();
@@ -68,6 +70,7 @@ int Session::handle_request() {
     }
   }
 
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "Creating a handler";
   manager.setRequestMap(request_map);
   manager.setHandlers(handlers);
   std::unique_ptr<Handler> handler_ptr(
