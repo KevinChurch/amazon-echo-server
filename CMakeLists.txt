@@ -24,8 +24,21 @@ set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.50 REQUIRED COMPONENTS system log)
 message(STATUS "Boost version: ${Boost_VERSION}")
 
+# Enable SQLite3
+add_library(sqlite3 STATIC IMPORTED)
+set_target_properties(sqlite3
+  PROPERTIES
+  IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsqlite3.a
+  INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set_target_properties(sqlite3
+    PROPERTIES
+      INTERFACE_LINK_LIBRARIES "dl;pthread"
+   )
+endif()
+
 LIST (APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-find_package (SQLite3 REQUIRED)
 
 include_directories(include)
 
@@ -46,6 +59,7 @@ add_library(handler_lib
   src/request.cc
   src/reply.cc
   src/handler_manager.cc
+  src/html_builder.cc
 )
 add_library(logging_lib src/logging.cc)
 add_library(database_lib src/database.cc)
@@ -55,16 +69,16 @@ target_link_libraries(server
     PRIVATE
         config_parser_lib
         server_lib
-	request_lib
+	      request_lib
         reply_lib
       	handler_lib
         logging_lib
-	database_lib
-	Boost::system
+        database_lib
+	      Boost::system
       	Boost::log_setup
         Boost::log
-	Boost::thread
-	sqlite3
+	      Boost::thread
+	      sqlite3
 )
 
 add_executable(config_parser_test tests/config_parser_test.cc)
