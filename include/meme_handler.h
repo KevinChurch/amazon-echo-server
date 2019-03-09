@@ -79,6 +79,8 @@ private:
   */
   std::map<std::string, std::string> viewMeme(const uint32_t meme_id);
 
+  std::vector<std::map<std::string, std::string>> viewMemes();
+
   /**
      retrieve all memes from the database and return the list of meme ids
 

@@ -1,6 +1,7 @@
 #include "meme_handler.h"
 #include "database.h"
 #include <vector>
+#include "html_builder.h"
 
 MemeHandler* MemeHandler::create(const NginxConfig& config,
                                  const std::string& root_path) {
@@ -63,7 +64,7 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     file_path = "/static/memes/new.html";
     body = ReadFromFile(file_path);
     // set the body
-    reply_ptr->SetBody(body);
+  reply_ptr->SetBody(body);
   }
   else if (action_str == "create") {
     // check if the method is POST
@@ -103,18 +104,19 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     }
     // call viewMeme() with given parameters
     std::map<std::string, std::string> meme_map = viewMeme(std::atoi(params["id"].c_str()));
-    // TODO:: use html builder to fill in show.html with return values from viewMeme()
-    // TODO:: set the body
-    body = "VIEW BODY";
-    reply_ptr->SetBody(body);
+    HtmlBuilder partialBuilder("/static/memes/partials/_meme.html");
+    HtmlBuilder showBuilder("/static/memes/show.html");
+    partialBuilder.inject(meme_map);
+    showBuilder.inject("meme", partialBuilder.getHtml());
+    reply_ptr->SetBody(showBuilder.getHtml());
   }
   else if (action_str == "list") {
-    // call listMeme()
-    std::vector<uint32_t> meme_vector = listMeme();
-    // TODO: use html builder to fill in index.html with return values from listMeme()
-    // TODO: set the body
-    body = "LIST BODY";
-    reply_ptr->SetBody(body);
+    std::vector<std::map<std::string, std::string>> memes = viewMemes();
+    HtmlBuilder partialBuilder("/static/memes/partials/_meme.html");
+    HtmlBuilder indexBuilder("/static/memes/index.html");
+    partialBuilder.inject(memes);
+    indexBuilder.inject("memes", partialBuilder.getHtml());
+    reply_ptr->SetBody(indexBuilder.getHtml());
   }
 
   reply_ptr->SetStatus(200);
@@ -178,6 +180,22 @@ std::map<std::string, std::string> MemeHandler::viewMeme(const uint32_t meme_id)
   meme_map["bottom_text"] = meme.bottom_text;
 
   return meme_map;
+}
+
+std::vector<std::map<std::string, std::string>> MemeHandler::viewMemes() {
+  std::vector<Meme> all_meme = database->GetAllMemes();
+  std::vector<std::map<std::string, std::string>> memes;
+
+  for (auto &meme : all_meme) {
+    std::map<std::string, std::string> meme_map;
+    meme_map["meme_id"] = std::to_string(meme.meme_id);
+    meme_map["template_id"] = std::to_string(meme.template_id);
+    meme_map["top_text"] = meme.top_text;
+    meme_map["bottom_text"] = meme.bottom_text;    
+    memes.push_back(meme_map);
+  }
+
+  return memes;
 }
 
 /**

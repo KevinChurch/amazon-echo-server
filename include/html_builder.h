@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 class HtmlBuilder {
  public:
@@ -11,6 +12,8 @@ class HtmlBuilder {
   void inject(std::string original, std::string replacement);
   void inject(std::vector<std::string> originals,
               std::vector<std::string> replacements);
+  void inject(std::map<std::string, std::string> input);
+  void inject(std::vector<std::map<std::string, std::string>> input);
   void inject(std::vector<std::string> originals,
               std::vector<std::vector<std::string>> replacements);
 
@@ -23,5 +26,6 @@ class HtmlBuilder {
                      std::string replacement);
   void shallowInject(std::string &tHtml, std::vector<std::string> originals,
                      std::vector<std::string> replacements);
+  void shallowInject(std::string &tHtml, std::map<std::string, std::string> input);
   std::string generateMarker(std::string input);
 };

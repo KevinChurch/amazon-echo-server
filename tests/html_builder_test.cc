@@ -2,6 +2,7 @@
 #include <fstream>
 #include <streambuf>
 #include <vector>
+#include <map>
 #include "gtest/gtest.h"
 
 class HtmlBuilderTest : public ::testing::Test {
@@ -29,7 +30,7 @@ TEST_F(HtmlBuilderTest, InjectAttribute) {
   EXPECT_EQ(htmlBuilder.getHtml(), html);
 }
 
-TEST_F(HtmlBuilderTest, InjectAttributes) {
+TEST_F(HtmlBuilderTest, InjectAttributesWithVectors) {
   HtmlBuilder htmlBuilder("./html/before1.html");
   std::ifstream file("./html/after1.html");
   std::string html = std::string((std::istreambuf_iterator<char>(file)),
@@ -39,6 +40,19 @@ TEST_F(HtmlBuilderTest, InjectAttributes) {
   std::vector<std::string> replacements = {"Amazon", "Welcome!"};
 
   htmlBuilder.inject(originals, replacements);
+
+  EXPECT_EQ(htmlBuilder.getHtml(), html);
+}
+
+TEST_F(HtmlBuilderTest, InjectAttributesWithMaps) {
+  HtmlBuilder htmlBuilder("./html/before1.html");
+  std::ifstream file("./html/after1.html");
+  std::string html = std::string((std::istreambuf_iterator<char>(file)),
+                                 std::istreambuf_iterator<char>());
+
+  std::map<std::string, std::string> input = {{"REPLACE ME 1", "Amazon"}, {"REPLACE ME 2", "Welcome!"}};
+
+  htmlBuilder.inject(input);
 
   EXPECT_EQ(htmlBuilder.getHtml(), html);
 }
@@ -60,6 +74,52 @@ TEST_F(HtmlBuilderTest, MultipleInjectAttributes) {
       {"5", "1", "top text 5", "bottom text 5"}};
 
   htmlBuilder1.inject(originals, replacements);
+  htmlBuilder2.inject("memes", htmlBuilder1.getHtml());
+
+  EXPECT_EQ(htmlBuilder2.getHtml(), html);
+}
+
+TEST_F(HtmlBuilderTest, MultipleInjectAttributesWithMaps) {
+  HtmlBuilder htmlBuilder1("./html/partials/_meme.html");
+  HtmlBuilder htmlBuilder2("./html/before2.html");
+  std::ifstream file("./html/after2.html");
+  std::string html = std::string((std::istreambuf_iterator<char>(file)),
+                                 std::istreambuf_iterator<char>());
+
+  std::vector<std::map<std::string, std::string>> inputs = {
+    {
+      {"meme.meme_id", "1"},
+      {"meme.template_id", "1"},
+      {"meme.top_text", "top text 1"},
+      {"meme.bottom_text", "bottom text 1"}
+    },
+    {
+      {"meme.meme_id", "2"},
+      {"meme.template_id", "2"},
+      {"meme.top_text", "top text 2"},
+      {"meme.bottom_text", "bottom text 2"}
+    },
+    {
+      {"meme.meme_id", "3"},
+      {"meme.template_id", "1"},
+      {"meme.top_text", "top text 3"},
+      {"meme.bottom_text", "bottom text 3"}
+    },
+    {
+      {"meme.meme_id", "4"},
+      {"meme.template_id", "2"},
+      {"meme.top_text", "top text 4"},
+      {"meme.bottom_text", "bottom text 4"}
+    },
+    {
+      {"meme.meme_id", "5"},
+      {"meme.template_id", "1"},
+      {"meme.top_text", "top text 5"},
+      {"meme.bottom_text", "bottom text 5"}
+    }
+  };
+
+  htmlBuilder1.inject(inputs);
   htmlBuilder2.inject("memes", htmlBuilder1.getHtml());
 
   EXPECT_EQ(htmlBuilder2.getHtml(), html);
