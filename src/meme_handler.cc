@@ -77,8 +77,9 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     body = ReadFromFile(file_path);
     // set the body
   reply_ptr->SetBody(body);
+  reply_ptr->SetHeader("Content-Type", "text/html");
   }
-  else if (action_str == "create") {
+else if (action_str == "create") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/create";
     // check if the method is POST
     if (request.method() != "POST") {
@@ -123,6 +124,7 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     partialBuilder.inject(meme_map);
     showBuilder.inject("meme", partialBuilder.getHtml());
     reply_ptr->SetBody(showBuilder.getHtml());
+    reply_ptr->SetHeader("Content-Type", "text/html");
   }
   else if (action_str == "list") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/list";
@@ -132,10 +134,36 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     partialBuilder.inject(memes);
     indexBuilder.inject("memes", partialBuilder.getHtml());
     reply_ptr->SetBody(indexBuilder.getHtml());
+    reply_ptr->SetHeader("Content-Type", "text/html");
+  }
+  else if (action_str == "assets") {
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/assets";
+    std::unique_ptr<Reply> reply_ptr(new Reply());
+    std::string file_path = GetPath(request.uri());
+    std::ifstream file;
+
+    if (!IsRegularFile(file_path)) {
+      std::cerr << "Error: Static File requested, but file is not regular"
+                << std::endl;
+      BOOST_LOG_SEV(my_logger::get(), ERROR)
+          << "Static File requested, but file is not regular";
+      return nullptr;
+    }
+
+    file.open(file_path);
+    if (!file.is_open()) {
+      std::cerr << "Error: File could not be opened" << std::endl;
+      BOOST_LOG_SEV(my_logger::get(), ERROR) << "File could not be opened";
+      return nullptr;
+    }
+
+    std::string file_content = GetContent(file);
+    reply_ptr->SetHeader("Content-Type", GetContentType(file_path));
   }
 
+
+
   reply_ptr->SetStatus(200);
-  reply_ptr->SetHeader("Content-Type", "text/html");
   return reply_ptr;
 }
 
