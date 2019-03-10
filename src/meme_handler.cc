@@ -36,9 +36,10 @@ std::unique_ptr<Database> MemeHandler::InitDatabase() {
 std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
   std::cout << "\nMemeHandler::HandleRequest" << std::endl;
   BOOST_LOG_SEV(my_logger::get(), INFO) << "\nMemeHandler::HandleRequest";
-
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "Received URI: " << request.uri();
   std::unique_ptr<Reply> reply_ptr(new Reply());
   std::string request_uri = request.uri();
+
   std::string action_str = request_uri.substr(this->uri_prefix.length());
   std::string params_str;
   std::string file_path;
@@ -83,9 +84,13 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     }
     // get params from request
     params = request.params();
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "Received following parameters: ";
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "params['template_id']: " << params["template_id"];
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "params['top_text']: " << params["top_text"];
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "params['bottom_text']: " << params["bottom_text"];
     // call createMeme() with given parameters
     std::map<std::string, std::string> new_meme = createMeme(std::atoi(params["template_id"].c_str()), params["top_text"], params["bottom_text"]);
-    // TODO: redirect to /meme/view?id=new_meme_id
+
     std::string new_uri = "/meme/view?id=" + new_meme["meme_id"];
 
     auto req = request;
@@ -96,22 +101,24 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
   else if (action_str == "view") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/view";
     // parse params from params_str
-    size_t pos = body.find("=");
+    size_t pos = params_str.find("=");
     while (pos != std::string::npos) {
-      std::string key = body.substr(0, pos);
-      body = body.substr(pos+1);
+      std::string key = params_str.substr(0, pos);
+      params_str = params_str.substr(pos+1);
 
       std::string value;
-      pos = body.find("&");
-      if (pos != std::string::npos)
-        value = body.substr(0, pos);
+      pos = params_str.find("&");
+      if (pos != std::string::npos) {
+        value = params_str.substr(0, pos);
+        params_str = params_str.substr(pos+1);
+      }
       else
-        value = body;
+        value = params_str;
 
       params[key] = value;
-
-      pos = body.find("=");
+      pos = params_str.find("=");
     }
+
     // call viewMeme() with given parameters
     std::map<std::string, std::string> meme_map = viewMeme(std::atoi(params["id"].c_str()));
     HtmlBuilder partialBuilder("./static/memes/partials/_meme.html");

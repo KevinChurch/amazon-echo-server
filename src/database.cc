@@ -24,7 +24,7 @@ static int callback_GetAllMemes(void *ptr, int argc, char **argv, char **azColNa
   meme.bottom_text = argv[3];
 
   memes->push_back(meme);
-  
+
   return 0;
 }
 
@@ -70,18 +70,18 @@ void Database::Init(void){
       <<"Memes Table exists!";
     }
   else{
-    BOOST_LOG_SEV(my_logger::get(), INFO)    
+    BOOST_LOG_SEV(my_logger::get(), INFO)
       <<"Memes Table doesn't exist! Creating Memes Table . . .";
-    rc = sqlite3_exec(db, sql_create_table.c_str(), nullptr, (void*) &exists, &zErrMsg);    
+    rc = sqlite3_exec(db, sql_create_table.c_str(), nullptr, (void*) &exists, &zErrMsg);
     if( rc != SQLITE_OK ){
       fprintf(stderr, "SQL error: %s\n", zErrMsg);
       sqlite3_free(zErrMsg);
     }else{
-    BOOST_LOG_SEV(my_logger::get(), INFO)      
+    BOOST_LOG_SEV(my_logger::get(), INFO)
       <<"Created Memes Table!";
     }
   }
-  
+
   sqlite3_close(db);
 }
 
@@ -91,7 +91,9 @@ Meme Database::GetMeme(uint32_t id) const{
   char *zErrMsg = 0;
   int rc;
   Meme meme;
-  
+
+  BOOST_LOG_SEV(my_logger::get(), DEBUG) << "database GetMeme id: " << std::to_string(id);
+
   /* SQL Statement to get a meme by id */
   std::string sql = "SELECT rowid, * FROM MEMES " \
                     "WHERE rowid = " +
@@ -103,7 +105,7 @@ Meme Database::GetMeme(uint32_t id) const{
   if(rc) {
     fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
     return meme;
-  } 
+  }
 
   /* Execute SQL statement */
   rc = sqlite3_exec(db, sql.c_str(), callback_GetMeme, (void*) &meme, &zErrMsg);
@@ -115,11 +117,11 @@ Meme Database::GetMeme(uint32_t id) const{
     return meme;
   }
 
-  BOOST_LOG_SEV(my_logger::get(), INFO)      
+  BOOST_LOG_SEV(my_logger::get(), INFO)
     << "Successfully found Meme #" +
     std::to_string(id) + "!";
 
-  
+
   sqlite3_close(db);
   return meme;
 }
@@ -129,7 +131,7 @@ std::vector<Meme> Database::GetAllMemes(void) const{
   char *zErrMsg = 0;
   int rc;
   std::vector<Meme> memes;
-  
+
   /* SQL Statement to get all memes */
   std::string sql = "SELECT rowid, * FROM MEMES;";
 
@@ -139,7 +141,7 @@ std::vector<Meme> Database::GetAllMemes(void) const{
   if(rc) {
     fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
     return memes;
-  } 
+  }
 
   /* Execute SQL statement */
   rc = sqlite3_exec(db, sql.c_str(), callback_GetAllMemes, (void*) &memes, &zErrMsg);
@@ -151,9 +153,9 @@ std::vector<Meme> Database::GetAllMemes(void) const{
     return memes;
   }
 
-  BOOST_LOG_SEV(my_logger::get(), INFO)      
+  BOOST_LOG_SEV(my_logger::get(), INFO)
     << "Successfully retrieved all Memes!";
-  
+
   sqlite3_close(db);
   return memes;
 }
@@ -164,14 +166,14 @@ uint32_t Database::AddMeme(uint32_t template_id, std::string top_text, std::stri
   char *zErrMsg = 0;
   int rc;
   uint32_t meme_id;
-    
+
   /* SQL Statement to insert Meme*/
   std::string sql = "INSERT INTO MEMES VALUES(" +
                     std::to_string(template_id) + ", '" +
                     top_text + "', '" +
                     bottom_text + "');";
 
-    
+
 
   /* Open database */
   rc = sqlite3_open("amazon.db", &db);
@@ -179,7 +181,7 @@ uint32_t Database::AddMeme(uint32_t template_id, std::string top_text, std::stri
   if(rc) {
     fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
     return 0;
-  } 
+  }
 
   /* Execute SQL statement */
   rc = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &zErrMsg);
@@ -192,7 +194,7 @@ uint32_t Database::AddMeme(uint32_t template_id, std::string top_text, std::stri
   }
 
   meme_id = sqlite3_last_insert_rowid(db);
-  BOOST_LOG_SEV(my_logger::get(), INFO)      
+  BOOST_LOG_SEV(my_logger::get(), INFO)
     << "Successfully insterted Meme #" +
     std::to_string(meme_id) + "!";
 

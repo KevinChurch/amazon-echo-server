@@ -31,22 +31,22 @@
 
                 <div class="container">
                     <form id="meme-form" action="/meme/create" method="post">
-                        <label for="template">
+                        <label for="template_id">
                             Template
-                            <select name="template" required id="meme-template">
+                            <select name="template_id" required id="meme-template">
                                 <option value="2.jpg">One Does Not Simply</option>
                                 <option value="3.jpg">Grumpy Cat</option>
                             </select>
                         </label>
 
-                        <label for="top">
+                        <label for="top_text">
                             Top Text
-                            <input type="text" name="top" placeholder="Top text..." required id="meme-top">
+                            <input type="text" name="top_text" placeholder="Top text..." required id="meme-top">
                         </label>
 
-                        <label for="bottom">
+                        <label for="bottom_text">
                             Bottom Text
-                            <input type="text" name="bottom" placeholder="Bottom text..." required id="meme-bottom">
+                            <input type="text" name="bottom_text" placeholder="Bottom text..." required id="meme-bottom">
                         </label>
 
                         <input type="submit" class="button float-center" value="Submit">

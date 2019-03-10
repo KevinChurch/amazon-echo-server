@@ -91,10 +91,13 @@ void Request::set_params(std::string body) {
 
     std::string value;
     pos = body.find("&");
-    if (pos != std::string::npos)
+    if (pos != std::string::npos) {
       value = body.substr(0, pos);
-    else
+      body = body.substr(pos+1);
+    }
+    else {
       value = body;
+    }
 
     params_map[key] = value;
 
