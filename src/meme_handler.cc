@@ -89,7 +89,10 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "params['top_text']: " << params["top_text"];
     BOOST_LOG_SEV(my_logger::get(), INFO) << "params['bottom_text']: " << params["bottom_text"];
     // call createMeme() with given parameters
-    std::map<std::string, std::string> new_meme = createMeme(std::atoi(params["template_id"].c_str()), params["top_text"], params["bottom_text"]);
+    std::string top_text = pseudoDecode(params["top_text"]);
+    std::string bottom_text = pseudoDecode(params["bottom_text"]);
+
+    std::map<std::string, std::string> new_meme = createMeme(std::atoi(params["template_id"].c_str()), top_text, bottom_text);
 
     std::string new_uri = "/meme/view?id=" + new_meme["meme_id"];
 
@@ -386,4 +389,16 @@ std::string MemeHandler::ReadFromFile(std::string file_path) {
   std::string file_content = GetContent(file);
 
   return file_content;
+}
+
+
+std::string MemeHandler::pseudoDecode(std::string &string) {
+  std::string result = string;
+
+  size_t pos = result.find("+");
+  while (pos != std::string::npos) {
+    result.replace(pos, 1, " ");
+    pos = result.find("+");
+  }
+  return result;
 }

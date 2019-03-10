@@ -117,4 +117,6 @@ private:
   */
   std::string GetContent(std::ifstream& file);
   std::string ReadFromFile(std::string file_path);
+
+  std::string pseudoDecode(std::string &string);
 };

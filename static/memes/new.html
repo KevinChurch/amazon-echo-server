@@ -61,16 +61,18 @@
         integrity="sha256-/PFxCnsMh+nTuM0k3VJCRch1gwnCfKjaP8rJNq5SoBg= sha384-9ksAFjQjZnpqt6VtpjMjlp2S0qrGbcwF/rvrLUg2vciMhwc1UJJeAAOLuJ96w+Nj sha512-UMSn6RHqqJeJcIfV1eS2tPKCjzaHkU/KqgAnQ7Nzn0mLicFxaVhm9vq7zG5+0LALt15j1ljlg8Fp9PT1VGNmDw=="
         crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
-    <script srd="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/additional-methods.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/additional-methods.min.js"></script>
     <script>
         $(document).foundation();
         $("#meme-form").validate({
             rules: {
-                top: {
-                    maxlength: 40
+                top_text: {
+                    maxlength: 40,
+                    letterswithbasicpunc: true
                 },
-                bottom: {
-                    maxlength: 40
+                bottom_text: {
+                    maxlength: 40,
+                    letterswithbasicpunc: true
                 }
             }
         });
