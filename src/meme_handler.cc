@@ -39,14 +39,11 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
 
   std::unique_ptr<Reply> reply_ptr(new Reply());
   std::string request_uri = request.uri();
-  BOOST_LOG_SEV(my_logger::get(), DEBUG) << request_uri;
   std::string action_str = request_uri.substr(this->uri_prefix.length());
   std::string params_str;
   std::string file_path;
   std::string body;
   std::map<std::string, std::string> params;
-
-  BOOST_LOG_SEV(my_logger::get(), DEBUG) << action_str;
 
   size_t pos = action_str.find("/");
   if (pos == std::string::npos) {
@@ -58,32 +55,30 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
   }
 
   pos = action_str.find("?");
-  BOOST_LOG_SEV(my_logger::get(), DEBUG) << action_str;
-  BOOST_LOG_SEV(my_logger::get(), DEBUG) << std::to_string(pos);
   if(pos != std::string::npos) {
-    BOOST_LOG_SEV(my_logger::get(), DEBUG) << "INSIDE!";
     params_str = action_str.substr(pos+1);
     action_str = action_str.substr(0,pos);
-
   }
 
-  BOOST_LOG_SEV(my_logger::get(), DEBUG) << params_str;
-  BOOST_LOG_SEV(my_logger::get(), DEBUG) << action_str;
+  pos = action_str.find("/");
+  if(pos != std::string::npos) {
+    action_str = action_str.substr(0,pos);
+  }
 
   if (action_str == "new") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/new";
     // get content of /static/memes/assets/new.html
-    file_path = "/static/memes/new.html";
+    file_path = "./static/memes/new.html";
     body = ReadFromFile(file_path);
     // set the body
-  reply_ptr->SetBody(body);
-  reply_ptr->SetHeader("Content-Type", "text/html");
+    reply_ptr->SetBody(body);
+    reply_ptr->SetHeader("Content-Type", "text/html");
   }
-else if (action_str == "create") {
+  else if (action_str == "create") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/create";
     // check if the method is POST
     if (request.method() != "POST") {
-      BOOST_LOG_SEV(my_logger::get(), ERROR) << "Not a valid method for request to /memem/create";
+      BOOST_LOG_SEV(my_logger::get(), ERROR) << "Not a valid method for request to /meme/create";
       return nullptr;
     }
     // get params from request
@@ -119,8 +114,8 @@ else if (action_str == "create") {
     }
     // call viewMeme() with given parameters
     std::map<std::string, std::string> meme_map = viewMeme(std::atoi(params["id"].c_str()));
-    HtmlBuilder partialBuilder("/static/memes/partials/_meme.html");
-    HtmlBuilder showBuilder("/static/memes/show.html");
+    HtmlBuilder partialBuilder("./static/memes/partials/_meme.html");
+    HtmlBuilder showBuilder("./static/memes/show.html");
     partialBuilder.inject(meme_map);
     showBuilder.inject("meme", partialBuilder.getHtml());
     reply_ptr->SetBody(showBuilder.getHtml());
@@ -129,8 +124,8 @@ else if (action_str == "create") {
   else if (action_str == "list") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/list";
     std::vector<std::map<std::string, std::string>> memes = viewMemes();
-    HtmlBuilder partialBuilder("/static/memes/partials/_meme.html");
-    HtmlBuilder indexBuilder("/static/memes/index.html");
+    HtmlBuilder partialBuilder("./static/memes/partials/_meme.html");
+    HtmlBuilder indexBuilder("./static/memes/index.html");
     partialBuilder.inject(memes);
     indexBuilder.inject("memes", partialBuilder.getHtml());
     reply_ptr->SetBody(indexBuilder.getHtml());
@@ -138,7 +133,6 @@ else if (action_str == "create") {
   }
   else if (action_str == "assets") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/assets";
-    std::unique_ptr<Reply> reply_ptr(new Reply());
     std::string file_path = GetPath(request.uri());
     std::ifstream file;
 
@@ -158,16 +152,13 @@ else if (action_str == "create") {
     }
 
     std::string file_content = GetContent(file);
+    reply_ptr->SetBody(file_content);
     reply_ptr->SetHeader("Content-Type", GetContentType(file_path));
   }
-
-
 
   reply_ptr->SetStatus(200);
   return reply_ptr;
 }
-
-
 
 /**
       return the form for users to create a meme
@@ -179,7 +170,6 @@ std::string MemeHandler::newMeme(){
   //TODO: implement the string contents later
   std::string form_string;
   form_string = "";
-
 
   return form_string;
 }

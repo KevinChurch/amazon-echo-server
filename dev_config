@@ -65,6 +65,6 @@ handler sleep {
 
 handler meme {
     location /meme;
-    root /meme;
+    root static/memes;
     name meme;
 }
