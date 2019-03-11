@@ -66,6 +66,7 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     action_str = action_str.substr(0,pos);
   }
 
+  // /meme/new
   if (action_str == "new") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/new";
     // get content of /static/memes/assets/new.html
@@ -75,6 +76,7 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     reply_ptr->SetBody(body);
     reply_ptr->SetHeader("Content-Type", "text/html");
   }
+  // /meme/create
   else if (action_str == "create") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/create";
     // check if the method is POST
@@ -101,26 +103,10 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
 
     return HandleRequest(req);
   }
+  // /meme/view
   else if (action_str == "view") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/view";
-    // parse params from params_str
-    size_t pos = params_str.find("=");
-    while (pos != std::string::npos) {
-      std::string key = params_str.substr(0, pos);
-      params_str = params_str.substr(pos+1);
-
-      std::string value;
-      pos = params_str.find("&");
-      if (pos != std::string::npos) {
-        value = params_str.substr(0, pos);
-        params_str = params_str.substr(pos+1);
-      }
-      else
-        value = params_str;
-
-      params[key] = value;
-      pos = params_str.find("=");
-    }
+    params = GetParams(params_str);
 
     // call viewMeme() with given parameters
     std::map<std::string, std::string> meme_map = viewMeme(std::atoi(params["id"].c_str()));
@@ -131,6 +117,7 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     reply_ptr->SetBody(showBuilder.getHtml());
     reply_ptr->SetHeader("Content-Type", "text/html");
   }
+  // /meme/list
   else if (action_str == "list") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/list";
     std::vector<std::map<std::string, std::string>> memes = viewMemes();
@@ -141,6 +128,7 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     reply_ptr->SetBody(indexBuilder.getHtml());
     reply_ptr->SetHeader("Content-Type", "text/html");
   }
+  // /meme/assets
   else if (action_str == "assets") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/assets";
     std::string file_path = GetPath(request.uri());
@@ -164,6 +152,24 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     std::string file_content = GetContent(file);
     reply_ptr->SetBody(file_content);
     reply_ptr->SetHeader("Content-Type", GetContentType(file_path));
+  }
+  // /meme/delete
+  else if(action_str == "delete") {
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/delete";
+    params = GetParams(params_str);
+
+    // call deleteMeme() with given parameters
+    int result = deleteMeme(std::atoi(params["id"].c_str()));
+    if (result == -1) {
+      BOOST_LOG_SEV(my_logger::get(), ERROR) << "MemeHandler::HandleRequest - deleteMeme failed";
+    }
+
+    std::string new_uri = "/meme/list";
+
+    auto req = request;
+    req.set_uri(new_uri);
+
+    return HandleRequest(req);
   }
 
   reply_ptr->SetStatus(200);
@@ -256,6 +262,10 @@ std::vector<uint32_t> MemeHandler::listMeme(){
   }
 
   return all_meme_id;
+}
+
+int MemeHandler::deleteMeme(const uint32_t meme_id) {
+  return database->DeleteMeme(meme_id);
 }
 
 std::string MemeHandler::GetPath(std::string url) {
@@ -401,4 +411,29 @@ std::string MemeHandler::pseudoDecode(std::string &string) {
     pos = result.find("+");
   }
   return result;
+}
+
+std::map<std::string, std::string> MemeHandler::GetParams(std::string params_str) {
+  std::map<std::string, std::string> params;
+
+  // parse params from params_str
+  size_t pos = params_str.find("=");
+  while (pos != std::string::npos) {
+    std::string key = params_str.substr(0, pos);
+    params_str = params_str.substr(pos+1);
+
+    std::string value;
+    pos = params_str.find("&");
+    if (pos != std::string::npos) {
+      value = params_str.substr(0, pos);
+      params_str = params_str.substr(pos+1);
+    }
+    else
+      value = params_str;
+
+    params[key] = value;
+    pos = params_str.find("=");
+  }
+
+  return params;
 }

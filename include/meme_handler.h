@@ -87,6 +87,9 @@ private:
      @return a vector of meme ids
   */
   std::vector<uint32_t> listMeme();
+
+  int deleteMeme(const uint32_t meme_id);
+
   /**
       Given a url received from request, get a file path to a static file
       requested by client
@@ -117,6 +120,6 @@ private:
   */
   std::string GetContent(std::ifstream& file);
   std::string ReadFromFile(std::string file_path);
-
+  std::map<std::string, std::string> GetParams(std::string params_str);
   std::string pseudoDecode(std::string &string);
 };
