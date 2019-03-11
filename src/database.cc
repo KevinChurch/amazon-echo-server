@@ -161,42 +161,67 @@ std::vector<Meme> Database::GetAllMemes(void) const{
 }
 
 
-uint32_t Database::AddMeme(uint32_t template_id, std::string top_text, std::string bottom_text){
+int Database::AddMeme(uint32_t template_id, std::string top_text, std::string bottom_text){
   sqlite3 *db;
   char *zErrMsg = 0;
   int rc;
-  uint32_t meme_id;
+  int meme_id;
+  sqlite3_stmt *stmt;
+  std::vector<Meme> memes;
+
 
   /* SQL Statement to insert Meme*/
-  std::string sql = "INSERT INTO MEMES VALUES(" +
-                    std::to_string(template_id) + ", '" +
-                    top_text + "', '" +
-                    bottom_text + "');";
+  std::string sql = "INSERT INTO MEMES VALUES(?,?,?);";
 
-  /* Open database */
   rc = sqlite3_open("amazon.db", &db);
 
   if(rc) {
     fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-    return 0;
+    return -1;
   }
 
-  /* Execute SQL statement */
-  rc = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &zErrMsg);
+  //Prepare the Statement
+  if ( sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, 0)
+       != SQLITE_OK) {
+    printf("\nCould not prepare statement: %s", sqlite3_errmsg(db));
+    return -1;
+  }
 
-  if( rc != SQLITE_OK ){
-    fprintf(stderr, "SQL error: %s\n", zErrMsg);
-    sqlite3_free(zErrMsg);
-    sqlite3_close(db);
-    return 0;
+  //Bind the Template ID
+  if (sqlite3_bind_int(stmt, 1, meme_id)
+      != SQLITE_OK) {
+    printf("\nCould not bind int.\n");
+    return -1;
+  }
+
+  //Bind the Top Text
+  if (sqlite3_bind_text(stmt, 2, top_text.c_str(), -1, SQLITE_STATIC)
+      != SQLITE_OK) {
+    printf("\nCould not bind search string.\n");
+    return -1;
+  }
+
+  //Bind the Bottom Text
+  if (sqlite3_bind_text(stmt, 3, bottom_text.c_str(), -1, SQLITE_STATIC)
+      != SQLITE_OK) {
+    printf("\nCould not bind search string.\n");
+    return -1;
+  }
+
+  //Execute the statement
+  if (sqlite3_step(stmt) != SQLITE_DONE) {
+    printf("\nCould not step (execute) stmt.\n");
+    return -1;
   }
 
   meme_id = sqlite3_last_insert_rowid(db);
-  BOOST_LOG_SEV(my_logger::get(), INFO)
-    << "Successfully insterted Meme #" +
-    std::to_string(meme_id) + "!";
 
+  sqlite3_finalize(stmt);
   sqlite3_close(db);
+
+  BOOST_LOG_SEV(my_logger::get(), INFO)
+    << "Successfully inserted Meme #" << std::to_string(meme_id) << "!";
+
   return meme_id;
 }
 
@@ -238,6 +263,7 @@ int Database::DeleteMeme(uint32_t meme_id){
     << "Successfully deleted Meme #" +
     std::to_string(meme_id) + "!";
 
+  sqlite3_close(db);
   sqlite3_finalize(stmt);
 
   return 0;
@@ -295,6 +321,7 @@ std::vector<Meme> Database::FindMemes(std::string search_string){
 
   //Release resources
   sqlite3_finalize(stmt);
+  sqlite3_close(db);
 
   BOOST_LOG_SEV(my_logger::get(), INFO)
     << "Successfully found Memes containing '" +
@@ -369,6 +396,8 @@ int Database::UpdateMeme(uint32_t meme_id,
   }
 
   sqlite3_finalize(stmt);
+  sqlite3_close(db);
+
 
   BOOST_LOG_SEV(my_logger::get(), INFO)
     << "Successfully Updated Meme #" << std::to_string(meme_id) << "!";

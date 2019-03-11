@@ -18,7 +18,7 @@ class Database {
   std::vector<Meme> GetAllMemes() const;
 
   //Insert Meme function
-  uint32_t AddMeme(uint32_t template_id, std::string top_text, std::string bottom_text);
+  int AddMeme(uint32_t template_id, std::string top_text, std::string bottom_text);
 
   //Update Meme function
   int UpdateMeme(uint32_t meme_id, uint32_t template_id, std::string top_text, std::string bottom_text);
