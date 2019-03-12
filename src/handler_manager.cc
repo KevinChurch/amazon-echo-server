@@ -10,6 +10,7 @@
 #include "reverse_proxy_handler.h"
 #include "sleep_handler.h"
 #include "meme_handler.h"
+#include "health_check_handler.h"
 
 // Registration mechanism. Your server must have a delegate class
 // which takes care of registering creation factories for handlers.
@@ -51,6 +52,8 @@ std::unique_ptr<Handler> HandlerManager::createByName(
     // delete st_handler;
   } else if (name == "meme") {
     handler_ptr.reset(MemeHandler::create(config, root_path));
+  } else if (name == "health_check") {
+    handler_ptr.reset(HealthCheckHandler::create(config, root_path));
   }
   // Potential TODO: handle a default case where the name is missing/wrong.
   // currently it creates a segmentation fault

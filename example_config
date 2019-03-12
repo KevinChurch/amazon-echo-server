@@ -68,3 +68,8 @@ handler meme {
     root /static/memes;
     name meme;
 }
+
+handler health_check {
+    location /health;
+    name health_check;
+}

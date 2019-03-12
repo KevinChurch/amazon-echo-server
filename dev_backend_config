@@ -62,3 +62,8 @@ handler sleep {
     location /sleep;
     name sleep;
 }
+
+handler health_check {
+    location /health;
+    name health_check;
+}
