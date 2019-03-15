@@ -96,12 +96,12 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
 
     std::map<std::string, std::string> new_meme = createMeme(std::atoi(params["template_id"].c_str()), top_text, bottom_text);
 
-    std::string new_uri = "/meme/view?id=" + new_meme["meme_id"];
+    // redirect version
+    std::string new_location = "/meme/view?id=" + new_meme["meme_id"];
 
-    auto req = request;
-    req.set_uri(new_uri);
-
-    return HandleRequest(req);
+    reply_ptr->SetStatus(301);
+    reply_ptr->SetHeader("Location", new_location);
+    return reply_ptr;
   }
   // /meme/view
   else if (action_str == "view") {
@@ -164,12 +164,15 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
       BOOST_LOG_SEV(my_logger::get(), ERROR) << "MemeHandler::HandleRequest - deleteMeme failed";
     }
 
-    std::string new_uri = "/meme/list";
+    std::string new_location = "/meme/list";
 
-    auto req = request;
-    req.set_uri(new_uri);
-
-    return HandleRequest(req);
+    reply_ptr->SetStatus(301);
+    reply_ptr->SetHeader("Location", new_location);
+    return reply_ptr;
+  }
+  // other invalid URL's
+  else {
+    return nullptr;
   }
 
   reply_ptr->SetStatus(200);
@@ -206,10 +209,8 @@ std::map<std::string, std::string> MemeHandler::createMeme(const uint32_t templa
                                                  std::string& top_text,
                                                  std::string& bottom_text){
   uint32_t meme_id = database->AddMeme(template_id, top_text, bottom_text);
-  // TODO: fix this meme_id to get the meme_id from a newly created meme
-  // uint32_t meme_id = 0;
+  // TODO: add error handling after Kevin's change is merged
 
-  // TODO: implement redirection to meme/view after redirection
   return viewMeme(meme_id);
 }
 

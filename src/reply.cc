@@ -32,6 +32,9 @@ std::string Reply::ToString(void) const {
   if (this->status_code() == 200) {
     s += "OK";
   }
+  else if (this->status_code() == 301) {
+    s += "Moved Permanently";
+  }
 
   s += "\r\n";
 
