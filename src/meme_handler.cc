@@ -69,12 +69,39 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
   // /meme/new
   if (action_str == "new") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/new";
-    // get content of /static/memes/assets/new.html
-    file_path = "./static/memes/new.html";
-    body = ReadFromFile(file_path);
-    // set the body
-    reply_ptr->SetBody(body);
-    reply_ptr->SetHeader("Content-Type", "text/html");
+    params = GetParams(params_str);
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "Received following valid parameters: ";
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "params['update']: " << params["update"];
+
+    if (params["update"] != "") { // update parameter is not empty
+      // get the meme with the meme_id passed in params
+      std::map<std::string, std::string> meme_map = viewMeme(params["update"]);
+
+      // check if the meme exists for given meme_id
+      if (meme_map["meme_id"] == "") { // meme doesn't exist for given id - return null pointer
+        BOOST_LOG_SEV(my_logger::get(), INFO) << "Not a valid meme ID for update";
+        return nullptr;
+      }
+      else { // meme exists for given id
+        // TODO: THOMAS - edit new.html file to use HtmlBuilder to fill in the new form with
+        //                values from meme_map
+        // for now, I'm just gonna show /meme/view?id=$meme_map["meme_id"] to test it
+        HtmlBuilder partialBuilder("./static/memes/partials/_meme.html");
+        HtmlBuilder showBuilder("./static/memes/show.html");
+        partialBuilder.inject(meme_map);
+        showBuilder.inject("meme", partialBuilder.getHtml());
+        reply_ptr->SetBody(showBuilder.getHtml());
+        reply_ptr->SetHeader("Content-Type", "text/html");
+      }
+    }
+    else { // update parameter is empty
+      // get content of /static/memes/assets/new.html
+      file_path = "./static/memes/new.html";
+      body = ReadFromFile(file_path);
+      // set the body
+      reply_ptr->SetBody(body);
+      reply_ptr->SetHeader("Content-Type", "text/html");
+    }
   }
   // /meme/create
   else if (action_str == "create") {
@@ -86,15 +113,22 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     }
     // get params from request
     params = request.params();
-    BOOST_LOG_SEV(my_logger::get(), INFO) << "Received following parameters: ";
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "Received following valid parameters: ";
     BOOST_LOG_SEV(my_logger::get(), INFO) << "params['template_id']: " << params["template_id"];
     BOOST_LOG_SEV(my_logger::get(), INFO) << "params['top_text']: " << params["top_text"];
     BOOST_LOG_SEV(my_logger::get(), INFO) << "params['bottom_text']: " << params["bottom_text"];
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "params['update']: " << params["update"];
     // call createMeme() with given parameters
     std::string top_text = pseudoDecode(params["top_text"]);
     std::string bottom_text = pseudoDecode(params["bottom_text"]);
 
-    std::map<std::string, std::string> new_meme = createMeme(std::atoi(params["template_id"].c_str()), top_text, bottom_text);
+    std::map<std::string, std::string> new_meme;
+    if (params["update"] != "") { // update parameter is not empty
+      new_meme = editMeme(params["update"], params["template_id"], top_text, bottom_text);
+    }
+    else {
+      new_meme = createMeme(params["template_id"], top_text, bottom_text);
+    }
 
     // redirect version
     std::string new_location = "/meme/view?id=" + new_meme["meme_id"];
@@ -107,9 +141,11 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
   else if (action_str == "view") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/view";
     params = GetParams(params_str);
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "Received following valid parameters: ";
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "params['id']: " << params["id"];
 
     // call viewMeme() with given parameters
-    std::map<std::string, std::string> meme_map = viewMeme(std::atoi(params["id"].c_str()));
+    std::map<std::string, std::string> meme_map = viewMeme(params["id"]);
     HtmlBuilder partialBuilder("./static/memes/partials/_meme.html");
     HtmlBuilder showBuilder("./static/memes/show.html");
     partialBuilder.inject(meme_map);
@@ -120,7 +156,17 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
   // /meme/list
   else if (action_str == "list") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/list";
-    std::vector<std::map<std::string, std::string>> memes = viewMemes();
+    params = GetParams(params_str);
+    std::vector<std::map<std::string, std::string>> memes;
+
+    if (params["q"] != "") {
+      memes = findMemes(params["q"]);
+    }
+    else {
+      memes = viewMemes();
+    }
+
+    // std::vector<std::map<std::string, std::string>> memes = viewMemes();
     HtmlBuilder partialBuilder("./static/memes/partials/_meme.html");
     HtmlBuilder indexBuilder("./static/memes/index.html");
     partialBuilder.inject(memes);
@@ -157,6 +203,8 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
   else if(action_str == "delete") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/delete";
     params = GetParams(params_str);
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "Received following valid parameters: ";
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "params['id']: " << params["id"];
 
     // call deleteMeme() with given parameters
     int result = deleteMeme(std::atoi(params["id"].c_str()));
@@ -205,13 +253,26 @@ std::string MemeHandler::newMeme(){
     @return the return value from viewMeme(meme_id) where meme_id is the
             new meme_id
 */
-std::map<std::string, std::string> MemeHandler::createMeme(const uint32_t template_id,
+std::map<std::string, std::string> MemeHandler::createMeme(std::string& template_id,
                                                  std::string& top_text,
                                                  std::string& bottom_text){
-  uint32_t meme_id = database->AddMeme(template_id, top_text, bottom_text);
+  uint32_t uint_template_id = std::atoi(template_id.c_str());
+  uint32_t meme_id = database->AddMeme(uint_template_id, top_text, bottom_text);
   // TODO: add error handling after Kevin's change is merged
 
   return viewMeme(meme_id);
+}
+
+std::map<std::string, std::string> MemeHandler::editMeme(std::string& meme_id,
+                                                         std::string& template_id,
+                                                         std::string& top_text,
+                                                         std::string& bottom_text){
+  uint32_t uint_meme_id = std::atoi(meme_id.c_str());
+  uint32_t uint_template_id = std::atoi(template_id.c_str());
+  uint32_t new_meme_id = database->UpdateMeme(uint_meme_id, uint_template_id, top_text, bottom_text);
+  // TODO: add error handling after Kevin's change is merged
+
+  return viewMeme(new_meme_id);
 }
 
 /**
@@ -222,6 +283,18 @@ std::map<std::string, std::string> MemeHandler::createMeme(const uint32_t templa
    @return a vetcor with meme id, template image, top text, and bottom text
 */
 std::map<std::string, std::string> MemeHandler::viewMeme(const uint32_t meme_id){
+  Meme meme = database->GetMeme(meme_id);
+  std::map<std::string, std::string> meme_map;
+  meme_map["meme_id"] = std::to_string(meme.meme_id);
+  meme_map["template_id"] = std::to_string(meme.template_id);
+  meme_map["top_text"] = meme.top_text;
+  meme_map["bottom_text"] = meme.bottom_text;
+
+  return meme_map;
+}
+
+std::map<std::string, std::string> MemeHandler::viewMeme(const std::string meme_id_str){
+  uint32_t meme_id = std::atoi(meme_id_str.c_str());
   Meme meme = database->GetMeme(meme_id);
   std::map<std::string, std::string> meme_map;
   meme_map["meme_id"] = std::to_string(meme.meme_id);
@@ -244,6 +317,29 @@ std::vector<std::map<std::string, std::string>> MemeHandler::viewMemes() {
     meme_map["bottom_text"] = meme.bottom_text;
     memes.push_back(meme_map);
   }
+
+  return memes;
+}
+
+bool MemeHandler::compareMemesId(std::map<std::string, std::string> meme1, std::map<std::string, std::string> meme2) {
+    return (meme1["meme_id"] > meme2["meme_id"]);
+}
+
+std::vector<std::map<std::string, std::string>> MemeHandler::findMemes(std::string search_param) {
+  std::string search_string = pseudoDecode(search_param);
+  std::vector<Meme> all_meme = database->FindMemes(search_string);
+  std::vector<std::map<std::string, std::string>> memes;
+
+  for (auto &meme : all_meme) {
+    std::map<std::string, std::string> meme_map;
+    meme_map["meme_id"] = std::to_string(meme.meme_id);
+    meme_map["template_id"] = std::to_string(meme.template_id);
+    meme_map["top_text"] = meme.top_text;
+    meme_map["bottom_text"] = meme.bottom_text;
+    memes.push_back(meme_map);
+  }
+
+  sort(memes.begin(), memes.end(), compareMemesId);
 
   return memes;
 }

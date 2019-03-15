@@ -66,9 +66,14 @@ private:
       @return the return value from viewMeme(meme_id) where meme_id is the
               new meme_id
   */
-  std::map<std::string, std::string> createMeme(const uint32_t template_id,
-                                      std::string& top_text,
-                                      std::string& bottom_text);
+  std::map<std::string, std::string> createMeme(std::string& template_id,
+                                                   std::string& top_text,
+                                                   std::string& bottom_text);
+
+  std::map<std::string, std::string> editMeme(std::string& meme_id,
+                                                          std::string& template_id,
+                                                          std::string& top_text,
+                                                          std::string& bottom_text);
 
   /**
      given a meme id, get the meme id, template image, top text and bottom text
@@ -78,8 +83,13 @@ private:
      @return a vetcor with meme id, template image, top text, and bottom text
   */
   std::map<std::string, std::string> viewMeme(const uint32_t meme_id);
+  std::map<std::string, std::string> viewMeme(const std::string meme_id_str);
 
   std::vector<std::map<std::string, std::string>> viewMemes();
+
+  static bool compareMemesId(std::map<std::string, std::string> meme1, std::map<std::string, std::string> meme2);
+
+  std::vector<std::map<std::string, std::string>> findMemes(std::string search_param);
 
   /**
      retrieve all memes from the database and return the list of meme ids
