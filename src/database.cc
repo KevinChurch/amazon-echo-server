@@ -201,7 +201,7 @@ int Database::AddMeme(uint32_t template_id, std::string top_text, std::string bo
   }
 
   //Bind the Template ID
-  if (sqlite3_bind_int(stmt, 1, meme_id)
+  if (sqlite3_bind_int(stmt, 1, template_id)
       != SQLITE_OK) {
     BOOST_LOG_SEV(my_logger::get(), ERROR)
       << "Could not bind int.";
