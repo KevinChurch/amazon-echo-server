@@ -1,9 +1,10 @@
 #include "html_builder.h"
 #include <fstream>
+#include <map>
 #include <streambuf>
 #include <vector>
-#include <map>
 #include "gtest/gtest.h"
+#include "regex"
 
 class HtmlBuilderTest : public ::testing::Test {
  protected:
@@ -30,6 +31,16 @@ TEST_F(HtmlBuilderTest, InjectAttribute) {
   EXPECT_EQ(htmlBuilder.getHtml(), html);
 }
 
+TEST_F(HtmlBuilderTest, InjectAttributeWithDuplicates) {
+  HtmlBuilder htmlBuilder("./html/before4.html");
+  std::ifstream file("./html/after4.html");
+  std::string html = std::string((std::istreambuf_iterator<char>(file)),
+                                 std::istreambuf_iterator<char>());
+
+  htmlBuilder.inject("test", "test");
+  EXPECT_EQ(htmlBuilder.getHtml(), html);
+}
+
 TEST_F(HtmlBuilderTest, InjectAttributesWithVectors) {
   HtmlBuilder htmlBuilder("./html/before1.html");
   std::ifstream file("./html/after1.html");
@@ -50,7 +61,8 @@ TEST_F(HtmlBuilderTest, InjectAttributesWithMaps) {
   std::string html = std::string((std::istreambuf_iterator<char>(file)),
                                  std::istreambuf_iterator<char>());
 
-  std::map<std::string, std::string> input = {{"REPLACE ME 1", "Amazon"}, {"REPLACE ME 2", "Welcome!"}};
+  std::map<std::string, std::string> input = {{"REPLACE ME 1", "Amazon"},
+                                              {"REPLACE ME 2", "Welcome!"}};
 
   htmlBuilder.inject(input);
 
@@ -87,40 +99,45 @@ TEST_F(HtmlBuilderTest, MultipleInjectAttributesWithMaps) {
                                  std::istreambuf_iterator<char>());
 
   std::vector<std::map<std::string, std::string>> inputs = {
-    {
-      {"meme.meme_id", "1"},
-      {"meme.template_id", "1"},
-      {"meme.top_text", "top text 1"},
-      {"meme.bottom_text", "bottom text 1"}
-    },
-    {
-      {"meme.meme_id", "2"},
-      {"meme.template_id", "2"},
-      {"meme.top_text", "top text 2"},
-      {"meme.bottom_text", "bottom text 2"}
-    },
-    {
-      {"meme.meme_id", "3"},
-      {"meme.template_id", "1"},
-      {"meme.top_text", "top text 3"},
-      {"meme.bottom_text", "bottom text 3"}
-    },
-    {
-      {"meme.meme_id", "4"},
-      {"meme.template_id", "2"},
-      {"meme.top_text", "top text 4"},
-      {"meme.bottom_text", "bottom text 4"}
-    },
-    {
-      {"meme.meme_id", "5"},
-      {"meme.template_id", "1"},
-      {"meme.top_text", "top text 5"},
-      {"meme.bottom_text", "bottom text 5"}
-    }
-  };
+      {{"meme.meme_id", "1"},
+       {"meme.template_id", "1"},
+       {"meme.top_text", "top text 1"},
+       {"meme.bottom_text", "bottom text 1"}},
+      {{"meme.meme_id", "2"},
+       {"meme.template_id", "2"},
+       {"meme.top_text", "top text 2"},
+       {"meme.bottom_text", "bottom text 2"}},
+      {{"meme.meme_id", "3"},
+       {"meme.template_id", "1"},
+       {"meme.top_text", "top text 3"},
+       {"meme.bottom_text", "bottom text 3"}},
+      {{"meme.meme_id", "4"},
+       {"meme.template_id", "2"},
+       {"meme.top_text", "top text 4"},
+       {"meme.bottom_text", "bottom text 4"}},
+      {{"meme.meme_id", "5"},
+       {"meme.template_id", "1"},
+       {"meme.top_text", "top text 5"},
+       {"meme.bottom_text", "bottom text 5"}}};
 
   htmlBuilder1.inject(inputs);
   htmlBuilder2.inject("memes", htmlBuilder1.getHtml());
 
   EXPECT_EQ(htmlBuilder2.getHtml(), html);
+}
+
+TEST_F(HtmlBuilderTest, EqualityInject) {
+  HtmlBuilder htmlBuilder("./html/before3.html");
+  std::ifstream file("./html/after3.html");
+  std::string html = std::string((std::istreambuf_iterator<char>(file)),
+                                 std::istreambuf_iterator<char>());
+
+  std::map<std::string, std::string> input({{"meme_id", "1"},
+                                            {"top_text", "top text"},
+                                            {"bottom_text", "bottom text"}});
+
+  htmlBuilder.inject(input);
+  htmlBuilder.equalityInject("2", "template_id", "selected");
+
+  EXPECT_EQ(htmlBuilder.getHtml(), html);
 }

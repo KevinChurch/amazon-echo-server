@@ -1,0 +1,80 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Meme</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/foundation-sites@6.5.3/dist/css/foundation.min.css"
+        integrity="sha256-xpOKVlYXzQ3P03j397+jWFZLMBXLES3IiryeClgU5og= sha384-gP4DhqyoT9b1vaikoHi9XQ8If7UNLO73JFOOlQV1RATrA7D0O7TjJZifac6NwPps sha512-AKwIib1E+xDeXe0tCgbc9uSvPwVYl6Awj7xl0FoaPFostZHOuDQ1abnDNCYtxL/HWEnVOMrFyf91TDgLPi9pNg=="
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/stylesheets/main.css">
+</head>
+
+<body>
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <ul class="menu">
+                <li class="topbar-title">
+                    <a class="" href="/meme/list"><strong>Meme Generator</strong></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="main-container" class="grid-container">
+        <div class="grid-x grid-padding-x align-center">
+            <div class="cell small-8">
+                <div class="text-center container">
+                    <h1>Edit Meme</h1>
+                </div>
+
+                <div class="container">
+                    <form id="meme-form" action="/meme/update?id=1" method="put">
+                        <label for="template">
+                            Template
+                            <select name="template" required id="meme-template">
+                                <option value="2" selected>One Does Not Simply</option>
+                                <option value="3" >Grumpy Cat</option>
+                            </select>
+                        </label>
+
+                        <label for="top">
+                            Top Text
+                            <input type="text" name="top" placeholder="Top text..." required id="meme-top" value="top text">
+                        </label>
+
+                        <label for="bottom">
+                            Bottom Text
+                            <input type="text" name="bottom" placeholder="Bottom text..." required id="meme-bottom" value="bottom text">
+                        </label>
+
+                        <input type="submit" class="button float-center" value="Submit">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/foundation-sites@6.5.3/dist/js/foundation.min.js"
+        integrity="sha256-/PFxCnsMh+nTuM0k3VJCRch1gwnCfKjaP8rJNq5SoBg= sha384-9ksAFjQjZnpqt6VtpjMjlp2S0qrGbcwF/rvrLUg2vciMhwc1UJJeAAOLuJ96w+Nj sha512-UMSn6RHqqJeJcIfV1eS2tPKCjzaHkU/KqgAnQ7Nzn0mLicFxaVhm9vq7zG5+0LALt15j1ljlg8Fp9PT1VGNmDw=="
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
+    <script srd="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/additional-methods.min.js"></script>
+    <script>
+        $(document).foundation();
+        $("#meme-form").validate({
+            rules: {
+                top: {
+                    maxlength: 40
+                },
+                bottom: {
+                    maxlength: 40
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
