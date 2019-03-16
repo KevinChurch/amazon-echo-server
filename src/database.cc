@@ -74,7 +74,8 @@ void Database::Init(void){
       <<"Memes Table doesn't exist! Creating Memes Table . . .";
     rc = sqlite3_exec(db, sql_create_table.c_str(), nullptr, (void*) &exists, &zErrMsg);
     if( rc != SQLITE_OK ){
-      fprintf(stderr, "SQL error: %s\n", zErrMsg);
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "SQL error: " << zErrMsg;
       sqlite3_free(zErrMsg);
     }else{
     BOOST_LOG_SEV(my_logger::get(), INFO)
@@ -103,7 +104,8 @@ Meme Database::GetMeme(uint32_t id) const{
   rc = sqlite3_open("amazon.db", &db);
 
   if(rc) {
-    fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Can't open database: %s\n" << sqlite3_errmsg(db);
     return meme;
   }
 
@@ -111,7 +113,8 @@ Meme Database::GetMeme(uint32_t id) const{
   rc = sqlite3_exec(db, sql.c_str(), callback_GetMeme, (void*) &meme, &zErrMsg);
 
   if( rc != SQLITE_OK ){
-    fprintf(stderr, "SQL error: %s\n", zErrMsg);
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "SQL error: " << zErrMsg;
     sqlite3_free(zErrMsg);
     sqlite3_close(db);
     return meme;
@@ -139,7 +142,8 @@ std::vector<Meme> Database::GetAllMemes(void) const{
   rc = sqlite3_open("amazon.db", &db);
 
   if(rc) {
-    fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Can't open database: %s\n" << sqlite3_errmsg(db);
     return memes;
   }
 
@@ -147,7 +151,8 @@ std::vector<Meme> Database::GetAllMemes(void) const{
   rc = sqlite3_exec(db, sql.c_str(), callback_GetAllMemes, (void*) &memes, &zErrMsg);
 
   if( rc != SQLITE_OK ){
-    fprintf(stderr, "SQL error: %s\n", zErrMsg);
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "SQL error: " << zErrMsg;
     sqlite3_free(zErrMsg);
     sqlite3_close(db);
     return memes;
@@ -176,41 +181,47 @@ int Database::AddMeme(uint32_t template_id, std::string top_text, std::string bo
   rc = sqlite3_open("amazon.db", &db);
 
   if(rc) {
-    fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Can't open database: %s\n" << sqlite3_errmsg(db);
     return -1;
   }
 
   //Prepare the Statement
   if ( sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, 0)
        != SQLITE_OK) {
-    printf("\nCould not prepare statement: %s", sqlite3_errmsg(db));
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not prepare statement: " << sqlite3_errmsg(db);
     return -1;
   }
 
   //Bind the Template ID
   if (sqlite3_bind_int(stmt, 1, meme_id)
       != SQLITE_OK) {
-    printf("\nCould not bind int.\n");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not bind int.";
     return -1;
   }
 
   //Bind the Top Text
   if (sqlite3_bind_text(stmt, 2, top_text.c_str(), -1, SQLITE_STATIC)
       != SQLITE_OK) {
-    printf("\nCould not bind search string.\n");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not bind string.";
     return -1;
   }
 
   //Bind the Bottom Text
   if (sqlite3_bind_text(stmt, 3, bottom_text.c_str(), -1, SQLITE_STATIC)
       != SQLITE_OK) {
-    printf("\nCould not bind search string.\n");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not bind string.";
     return -1;
   }
 
   //Execute the statement
   if (sqlite3_step(stmt) != SQLITE_DONE) {
-    printf("\nCould not step (execute) stmt.\n");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not step (execute) stmt.";
     return -1;
   }
 
@@ -236,26 +247,30 @@ int Database::DeleteMeme(uint32_t meme_id){
   rc = sqlite3_open("amazon.db", &db);
 
   if(rc) {
-    fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Can't open database: %s\n" << sqlite3_errmsg(db);
     return -1;
   }
 
   //Prepare the statement
   if ( sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, 0)
        != SQLITE_OK) {
-    printf("\nCould not prepare statement.");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not prepare statement: " << sqlite3_errmsg(db);
     return -1;
   }
 
   //Bind the Meme ID
   if ((rc = sqlite3_bind_int(stmt, 1, meme_id)) != SQLITE_OK) {
-    printf("\nCould not bind int.\n");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not bind int.";
     return -1;
   }
 
   //Execute the statement
   if (sqlite3_step(stmt) != SQLITE_DONE) {
-    printf("\nCould not step (execute) stmt.\n");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not step (execute) stmt.";
     return -1;
   }
 
@@ -284,28 +299,32 @@ std::vector<Meme> Database::FindMemes(std::string search_string){
   rc = sqlite3_open("amazon.db", &db);
 
   if(rc) {
-    fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Can't open database: %s\n" << sqlite3_errmsg(db);
     return memes;
   }
 
   //Prepare the Statement
   if (sqlite3_prepare_v2(db,  sql.c_str(), -1, &stmt, 0)
        != SQLITE_OK) {
-    printf("\nCould not prepare statement.");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not prepare statement: " << sqlite3_errmsg(db);
     return memes;
   }
 
   //Bind the Search String to parameter 1 (Top Text)
   if (sqlite3_bind_text(stmt, 1, binding.c_str(), -1, SQLITE_STATIC)
       != SQLITE_OK) {
-    printf("\nCould not bind search string.\n");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not bind search string.";
     return memes;
   }
 
   //Bind the Search String to parameter 2 (Bottom Text)
   if (sqlite3_bind_text(stmt, 2, binding.c_str(), -1, SQLITE_STATIC)
       != SQLITE_OK) {
-    printf("\nCould not bind search string.\n");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not bind search string.";
     return memes;
   }
 
@@ -350,48 +369,55 @@ int Database::UpdateMeme(uint32_t meme_id,
   rc = sqlite3_open("amazon.db", &db);
 
   if(rc) {
-    fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Can't open database: %s\n" << sqlite3_errmsg(db);
     return -1;
   }
 
   //Prepare the Statement
   if ( sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, 0)
        != SQLITE_OK) {
-    printf("\nCould not prepare statement: %s", sqlite3_errmsg(db));
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not prepare statement: " << sqlite3_errmsg(db);
     return -1;
   }
 
   //Bind the Meme ID
   if (sqlite3_bind_int(stmt, 4, meme_id)
       != SQLITE_OK) {
-    printf("\nCould not bind int.\n");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not bind int.";
     return -1;
   }
 
   //Bind the Template ID
   if (sqlite3_bind_int(stmt, 1, template_id)
       != SQLITE_OK) {
-    printf("\nCould not bind int.\n");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not bind int.";
     return -1;
   }
 
   //Bind the Top Text
   if (sqlite3_bind_text(stmt, 2, top_text.c_str(), -1, SQLITE_STATIC)
       != SQLITE_OK) {
-    printf("\nCould not bind search string.\n");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not bind search string.";
     return -1;
   }
 
   //Bind the Bottom Text
   if (sqlite3_bind_text(stmt, 3, bottom_text.c_str(), -1, SQLITE_STATIC)
       != SQLITE_OK) {
-    printf("\nCould not bind search string.\n");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not bind search string.";
     return -1;
   }
 
   //Execute the statement
   if (sqlite3_step(stmt) != SQLITE_DONE) {
-    printf("\nCould not step (execute) stmt.\n");
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Could not step (execute) stmt.";
     return -1;
   }
 
