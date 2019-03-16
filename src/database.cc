@@ -106,6 +106,7 @@ Meme Database::GetMeme(uint32_t id) const{
   if(rc) {
     BOOST_LOG_SEV(my_logger::get(), ERROR)
       << "Can't open database: %s\n" << sqlite3_errmsg(db);
+    BOOST_LOG_SEV(my_logger::get(), INFO) << meme.toString();
     return meme;
   }
 
@@ -117,6 +118,7 @@ Meme Database::GetMeme(uint32_t id) const{
       << "SQL error: " << zErrMsg;
     sqlite3_free(zErrMsg);
     sqlite3_close(db);
+    BOOST_LOG_SEV(my_logger::get(), INFO) << meme.toString();
     return meme;
   }
 
@@ -126,6 +128,7 @@ Meme Database::GetMeme(uint32_t id) const{
 
 
   sqlite3_close(db);
+  BOOST_LOG_SEV(my_logger::get(), INFO) << meme.toString();
   return meme;
 }
 
@@ -144,6 +147,7 @@ std::vector<Meme> Database::GetAllMemes(void) const{
   if(rc) {
     BOOST_LOG_SEV(my_logger::get(), ERROR)
       << "Can't open database: %s\n" << sqlite3_errmsg(db);
+    for(auto &meme : memes) { BOOST_LOG_SEV(my_logger::get(), INFO) << meme.toString(); }
     return memes;
   }
 
@@ -155,6 +159,7 @@ std::vector<Meme> Database::GetAllMemes(void) const{
       << "SQL error: " << zErrMsg;
     sqlite3_free(zErrMsg);
     sqlite3_close(db);
+    for(auto &meme : memes) { BOOST_LOG_SEV(my_logger::get(), INFO) << meme.toString(); }
     return memes;
   }
 
@@ -162,6 +167,7 @@ std::vector<Meme> Database::GetAllMemes(void) const{
     << "Successfully retrieved all Memes!";
 
   sqlite3_close(db);
+  for(auto &meme : memes) { BOOST_LOG_SEV(my_logger::get(), INFO) << meme.toString(); }
   return memes;
 }
 
@@ -301,6 +307,7 @@ std::vector<Meme> Database::FindMemes(std::string search_string){
   if(rc) {
     BOOST_LOG_SEV(my_logger::get(), ERROR)
       << "Can't open database: %s\n" << sqlite3_errmsg(db);
+    for(auto &meme : memes) { BOOST_LOG_SEV(my_logger::get(), INFO) << meme.toString(); }
     return memes;
   }
 
@@ -309,6 +316,7 @@ std::vector<Meme> Database::FindMemes(std::string search_string){
        != SQLITE_OK) {
     BOOST_LOG_SEV(my_logger::get(), ERROR)
       << "Could not prepare statement: " << sqlite3_errmsg(db);
+    for(auto &meme : memes) { BOOST_LOG_SEV(my_logger::get(), INFO) << meme.toString(); }
     return memes;
   }
 
@@ -317,6 +325,7 @@ std::vector<Meme> Database::FindMemes(std::string search_string){
       != SQLITE_OK) {
     BOOST_LOG_SEV(my_logger::get(), ERROR)
       << "Could not bind search string.";
+    for(auto &meme : memes) { BOOST_LOG_SEV(my_logger::get(), INFO) << meme.toString(); }
     return memes;
   }
 
@@ -325,6 +334,7 @@ std::vector<Meme> Database::FindMemes(std::string search_string){
       != SQLITE_OK) {
     BOOST_LOG_SEV(my_logger::get(), ERROR)
       << "Could not bind search string.";
+    for(auto &meme : memes) { BOOST_LOG_SEV(my_logger::get(), INFO) << meme.toString(); }
     return memes;
   }
 
@@ -346,6 +356,7 @@ std::vector<Meme> Database::FindMemes(std::string search_string){
     << "Successfully found Memes containing '" +
     search_string + "'!";
 
+  for(auto &meme : memes) { BOOST_LOG_SEV(my_logger::get(), INFO) << meme.toString(); }
   return memes;
 }
 
