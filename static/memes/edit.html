@@ -30,23 +30,23 @@
                 </div>
 
                 <div class="container">
-                    <form id="meme-form" action="/meme/create" method="put">
-                        <label for="template">
+                    <form id="meme-form" action="/meme/create" method="POST">
+                        <label for="template_id">
                             Template
-                            <select name="template" required id="meme-template">
+                            <select name="template_id" required id="meme-template">
                                 <option value="2" <!-- template_id == 2 -->>One Does Not Simply</option>
                                 <option value="3" <!-- template_id == 3 -->>Grumpy Cat</option>
                             </select>
                         </label>
 
-                        <label for="top">
+                        <label for="top_text">
                             Top Text
-                            <input type="text" name="top" placeholder="Top text..." required id="meme-top" value="<!-- top_text -->">
+                            <input type="text" name="top_text" placeholder="Top text..." required id="meme-top" value="<!-- top_text -->">
                         </label>
 
-                        <label for="bottom">
+                        <label for="bottom_text">
                             Bottom Text
-                            <input type="text" name="bottom" placeholder="Bottom text..." required id="meme-bottom" value="<!-- bottom_text -->">
+                            <input type="text" name="bottom_text" placeholder="Bottom text..." required id="meme-bottom" value="<!-- bottom_text -->">
                         </label>
 
                         <input type="hidden" name="update" value="<!-- meme_id -->">

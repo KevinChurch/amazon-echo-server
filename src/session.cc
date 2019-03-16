@@ -47,6 +47,7 @@ void Session::start() {
 
 int Session::handle_request() {
   BOOST_LOG_SEV(my_logger::get(), INFO) << "Handling request";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "Request: " << get_message_request();
 
   auto request = Request::ParseRequest(get_message_request());
   std::string s = socket_.remote_endpoint().address().to_string();

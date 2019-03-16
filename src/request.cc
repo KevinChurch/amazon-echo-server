@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include "logging.h"
+#include <boost/algorithm/string.hpp>
 
 // implementation for ParseRequest
 std::unique_ptr<Request> Request::ParseRequest(
@@ -50,7 +51,8 @@ std::unique_ptr<Request> Request::ParseRequest(
     }
   }
 
-  if (method != "GET" && method != "POST") {
+  if (!boost::iequals(method, "GET") &&
+      !boost::iequals(method, "POST")) {
     std::cerr << "Invalid method request!" << std::endl;
     BOOST_LOG_SEV(my_logger::get(), ERROR) << "Invalid method request!";
     req->m_original_request = "";

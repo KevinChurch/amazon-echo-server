@@ -2,6 +2,7 @@
 #include "database.h"
 #include <vector>
 #include "html_builder.h"
+#include <boost/algorithm/string.hpp>
 
 MemeHandler* MemeHandler::create(const NginxConfig& config,
                                  const std::string& root_path) {
@@ -86,9 +87,7 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
         HtmlBuilder editBuilder("./static/memes/edit.html");
         editBuilder.inject(meme_map);
         std::string value = meme_map.find("template_id")->second;
-        std::string prefix = "template_id";
-        std::string replacement = "selected";
-        editBuilder.equalityInject(value, prefix, replacement);
+        editBuilder.equalityInject(value, "template_id", "selected");
         reply_ptr->SetBody(editBuilder.getHtml());
         reply_ptr->SetHeader("Content-Type", "text/html");
       }
@@ -105,8 +104,9 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
   // /meme/create
   else if (action_str == "create") {
     BOOST_LOG_SEV(my_logger::get(), INFO) << "MemeHandler::HandleRequest - handling /meme/create";
-    // check if the method is POST
-    if (request.method() != "POST") {
+    
+    // check if the method is POST/PUT
+    if (!boost::iequals(request.method(), "POST")) {
       BOOST_LOG_SEV(my_logger::get(), ERROR) << "Not a valid method for request to /meme/create";
       return nullptr;
     }
