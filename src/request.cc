@@ -14,6 +14,9 @@ std::unique_ptr<Request> Request::ParseRequest(
   std::string body;
   int count = 0;
 
+  //Initialize request as invalid
+  req->m_valid = 0;
+
   for (unsigned int i = 0; i < original_request.size(); i++) {
     if (original_request[i] == '\r') break;
 
@@ -22,19 +25,13 @@ std::unique_ptr<Request> Request::ParseRequest(
         req->m_original_request = "";
         std::cerr << "400 BAD REQUEST!" << std::endl;
         BOOST_LOG_SEV(my_logger::get(), ERROR) << "400 BAD REQUEST!";
-        method = "";
-        url = "";
-        version = "";
-        break;
+	return req;
       }
       if (original_request[i - 1] == ' ') {
         req->m_original_request = "";
         std::cerr << "400 BAD REQUEST!" << std::endl;
         BOOST_LOG_SEV(my_logger::get(), ERROR) << "400 BAD REQUEST!";
-        method = "";
-        url = "";
-        version = "";
-        break;
+	return req;
       }
       count++;
       continue;
@@ -57,12 +54,14 @@ std::unique_ptr<Request> Request::ParseRequest(
     std::cerr << "Invalid method request!" << std::endl;
     BOOST_LOG_SEV(my_logger::get(), ERROR) << "Invalid method request!";
     req->m_original_request = "";
+    return req;
   }
 
   if (version != "HTTP/1.1") {
     std::cerr << "HTTP Version not support!" << std::endl;
     BOOST_LOG_SEV(my_logger::get(), ERROR) << "HTTP Version not support!";
     req->m_original_request = "";
+    return req;
   }
 
   if (url.size() < 1) req->m_original_request = "";
@@ -79,6 +78,8 @@ std::unique_ptr<Request> Request::ParseRequest(
   // parse parameters from body
   req->set_params(body);
 
+  //Request determined valid.
+  req->m_valid = 1;
   return req;
 }
 
@@ -107,6 +108,8 @@ void Request::set_params(std::string body) {
   m_params = params_map;
 }
 
+bool Request::valid() const { return m_valid; }
+
 std::string Request::original_request() const { return m_original_request; }
 
 std::string Request::method() const { return m_method; }
@@ -118,14 +121,3 @@ void Request::set_uri(std::string url) { m_uri = url; }
 std::string Request::version() const { return m_version; }
 
 std::map<std::string, std::string> Request::params() const { return m_params; }
-
-/*	we are using headers and body in response.cc file, I will delete this
-comment later using Headers = std::vector<std::pair<std::string, std::string>>;
-Headers Request::headers() const {
-        return m_headers;
-}
-
-std::string Request::body() const {
-        return m_body;
-}
-*/

@@ -16,18 +16,17 @@ class Request {
   std::string version() const;
   void set_params(std::string body);
   std::map<std::string, std::string> params() const;
-
+  bool valid() const;
   // we are using headers and body in response.cc file, I will delete this
   // comment later using Headers = std::vector<std::pair<std::string,
   // std::string>>; Headers headers() const; std::string body() const;
 
  private:
+  bool m_valid;
   std::string m_original_request;
   std::string m_method;
   std::string m_uri;
   std::string m_version;
   std::string m_body;
   std::map<std::string, std::string> m_params;
-  // std::string m_body;
-  // Headers m_headers;
 };

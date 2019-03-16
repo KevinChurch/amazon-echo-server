@@ -55,36 +55,45 @@ int Session::handle_request() {
   NginxConfig* handler_config;
   unsigned int longest_match_size = 0;
   std::string handler_name = "";
-
-  // Find longest matching URI
-  std::vector<NginxConfig*> handlers = config.FindBlocks("handler");
-  for (std::vector<NginxConfig*>::iterator iter = handlers.begin();
-       iter != handlers.end(); iter++) {
-    std::string prefix = (*iter)->Find("location");
-    if (original_url.find(prefix) == 0) {
-      if (prefix.length() > longest_match_size) {
-        longest_match_size = prefix.length();
-        handler_name = (*iter)->Find("name");
-        handler_config = *iter;
+  std::unique_ptr<Reply> reply_ptr = nullptr;
+  
+  //If the request is valid
+  if(request->valid()){
+    // Find longest matching URI
+    std::vector<NginxConfig*> handlers = config.FindBlocks("handler");
+    for (std::vector<NginxConfig*>::iterator iter = handlers.begin();
+	 iter != handlers.end(); iter++) {
+      std::string prefix = (*iter)->Find("location");
+      if (original_url.find(prefix) == 0) {
+	if (prefix.length() > longest_match_size) {
+	  longest_match_size = prefix.length();
+	  handler_name = (*iter)->Find("name");
+	  handler_config = *iter;
+	}
       }
     }
+
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "Creating a handler";
+    manager.setRequestMap(request_map);
+    manager.setHandlers(handlers);
+    std::unique_ptr<Handler> handler_ptr(
+					 manager.createByName(handler_name, *handler_config, config.Find("root")));
+
+    reply_ptr = handler_ptr->HandleRequest(*request);
+
+    // If failure, use NotFound Handler
+    if (!reply_ptr) {
+      std::unique_ptr<Handler> error_ptr(
+					 manager.createByName("not_found", this->config, config.Find("root")));
+      reply_ptr = error_ptr->HandleRequest(*request);
+    }
   }
-
-  BOOST_LOG_SEV(my_logger::get(), INFO) << "Creating a handler";
-  manager.setRequestMap(request_map);
-  manager.setHandlers(handlers);
-  std::unique_ptr<Handler> handler_ptr(
-      manager.createByName(handler_name, *handler_config, config.Find("root")));
-
-  std::unique_ptr<Reply> reply_ptr = handler_ptr->HandleRequest(*request);
-
-  // If failure, use NotFound Handler
-  if (!reply_ptr) {
-    std::unique_ptr<Handler> error_ptr(
-        manager.createByName("not_found", this->config, config.Find("root")));
-    reply_ptr = error_ptr->HandleRequest(*request);
+  //Else Request is invalid, use NotFound Handler
+  else{
+      std::unique_ptr<Handler> error_ptr(
+					 manager.createByName("not_found", this->config, config.Find("root")));
+      reply_ptr = error_ptr->HandleRequest(*request);
   }
-
   // putting the request to the request_map
   if (request_map->find(request->uri()) != request_map->end()) {
     if ((*request_map)[request->uri()].find(reply_ptr->status_code()) !=
