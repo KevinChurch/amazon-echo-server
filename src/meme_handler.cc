@@ -332,6 +332,7 @@ std::vector<std::map<std::string, std::string>> MemeHandler::viewMemes() {
     meme_map["top_text"] = meme.top_text;
     meme_map["bottom_text"] = meme.bottom_text;
     memes.push_back(meme_map);
+    BOOST_LOG_SEV(my_logger::get(), INFO) << meme.toString();
   }
 
   return memes;
