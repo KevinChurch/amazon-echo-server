@@ -14,7 +14,8 @@ StatusHandler* StatusHandler::create(const NginxConfig& config,
 }
 
 std::unique_ptr<Reply> StatusHandler::HandleRequest(const Request& request) {
-  BOOST_LOG_SEV(my_logger::get(), INFO) << "\n::ResponseMetrics::StatusHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "\nStatusHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Handler Name: StatusHandler";
   BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Request Path: " << request.uri();
 
   std::unique_ptr<Reply> reply_ptr(new Reply());

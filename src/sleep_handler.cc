@@ -16,7 +16,8 @@ SleepHandler* SleepHandler::create(const NginxConfig& config,
 }
 
 std::unique_ptr<Reply> SleepHandler::HandleRequest(const Request& request) {
-  BOOST_LOG_SEV(my_logger::get(), INFO) << "\n::ResponseMetrics::SleepHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "\nSleepHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Handler Name: SleepHandler";
   BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Request Path: " << request.uri();
 
   std::this_thread::sleep_for(std::chrono::seconds(5));

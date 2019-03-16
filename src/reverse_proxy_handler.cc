@@ -28,7 +28,8 @@ bool ReverseProxyHandler::Init(const NginxConfig& config,
  * NOTE: this has issues with connecting to https servers (e.g. port 443)
  */
 std::unique_ptr<Reply> ReverseProxyHandler::HandleRequest(const Request& request) {
-  BOOST_LOG_SEV(my_logger::get(), INFO) << "\n::ResponseMetrics::ReverseProxyHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "\nReverseProxyHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Handler Name: ReverseProxyHandler";
   BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Request Path: " << request.uri();
   BOOST_LOG_SEV(my_logger::get(), TRACE) << "[Reverse Proxy] root path: " << this->root_path
     << ", location: " << this->uri_prefix

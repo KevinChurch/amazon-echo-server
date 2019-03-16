@@ -20,7 +20,8 @@ EchoHandler* EchoHandler::create(const NginxConfig& config,
     HandleRequest echoes request by setting the original request as the response body.
 */
 std::unique_ptr<Reply> EchoHandler::HandleRequest(const Request& request) {
-  BOOST_LOG_SEV(my_logger::get(), INFO) << "\n::ResponseMetrics::EchoHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "\nEchoHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Handler Name: EchoHandler";
   BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Request Path: " << request.uri();
 
   std::unique_ptr<Reply> reply_ptr(new Reply());

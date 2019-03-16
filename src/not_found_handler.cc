@@ -14,7 +14,8 @@ NotFoundHandler* NotFoundHandler::create(const NginxConfig& config,
 }
 
 std::unique_ptr<Reply> NotFoundHandler::HandleRequest(const Request& request) {
-  BOOST_LOG_SEV(my_logger::get(), INFO) << "\n::ResponseMetrics::NotFoundHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "\nNotFoundHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Handler Name: NotFoundHandler";
   BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Request Path: " << request.uri();
 
   std::unique_ptr<Reply> reply_ptr(new Reply());

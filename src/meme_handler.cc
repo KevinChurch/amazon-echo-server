@@ -34,7 +34,8 @@ std::unique_ptr<Database> MemeHandler::InitDatabase() {
 }
 
 std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
-  BOOST_LOG_SEV(my_logger::get(), INFO) << "\n::ResponseMetrics::MemeHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "\nMemeHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Handler Name: MemeHandler";
   BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Request Path: " << request.uri();
   std::unique_ptr<Reply> reply_ptr(new Reply());
   std::string request_uri = request.uri();

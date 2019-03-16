@@ -8,7 +8,8 @@ HealthCheckHandler* HealthCheckHandler::create(const NginxConfig& config,
 }
 
 std::unique_ptr<Reply> HealthCheckHandler::HandleRequest(const Request& request) {
-  BOOST_LOG_SEV(my_logger::get(), INFO) << "\n::ResponseMetrics::HealthCheckHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "\nHealthCheckHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Handler Name: HealthCheckHandler";
   BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Request Path: " << request.uri();
 
   std::unique_ptr<Reply> reply_ptr(new Reply());
