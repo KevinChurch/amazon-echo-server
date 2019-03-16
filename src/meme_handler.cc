@@ -83,14 +83,13 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
         return nullptr;
       }
       else { // meme exists for given id
-        // TODO: THOMAS - edit new.html file to use HtmlBuilder to fill in the new form with
-        //                values from meme_map
-        // for now, I'm just gonna show /meme/view?id=$meme_map["meme_id"] to test it
-        HtmlBuilder partialBuilder("./static/memes/partials/_meme.html");
-        HtmlBuilder showBuilder("./static/memes/show.html");
-        partialBuilder.inject(meme_map);
-        showBuilder.inject("meme", partialBuilder.getHtml());
-        reply_ptr->SetBody(showBuilder.getHtml());
+        HtmlBuilder editBuilder("./static/memes/edit.html");
+        editBuilder.inject(meme_map);
+        std::string value = meme_map.find("template_id")->second;
+        std::string prefix = "template_id";
+        std::string replacement = "selected";
+        editBuilder.equalityInject(value, prefix, replacement);
+        reply_ptr->SetBody(editBuilder.getHtml());
         reply_ptr->SetHeader("Content-Type", "text/html");
       }
     }
@@ -333,7 +332,6 @@ std::vector<std::map<std::string, std::string>> MemeHandler::viewMemes() {
     meme_map["top_text"] = meme.top_text;
     meme_map["bottom_text"] = meme.bottom_text;
     memes.push_back(meme_map);
-    BOOST_LOG_SEV(my_logger::get(), INFO) << meme.toString();
   }
 
   return memes;
