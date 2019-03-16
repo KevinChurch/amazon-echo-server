@@ -117,6 +117,7 @@ int Session::handle_request() {
 
   BOOST_LOG_SEV(my_logger::get(), INFO) << s << " - - " << original_request_str
                                         << ' ' << reply_ptr->status_code();
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Request IP: " << s;
 
   return 0;
 }

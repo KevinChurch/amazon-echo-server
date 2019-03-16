@@ -28,7 +28,8 @@ bool ReverseProxyHandler::Init(const NginxConfig& config,
  * NOTE: this has issues with connecting to https servers (e.g. port 443)
  */
 std::unique_ptr<Reply> ReverseProxyHandler::HandleRequest(const Request& request) {
-  BOOST_LOG_SEV(my_logger::get(), INFO) << "ReverseProxyHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "\n::ResponseMetrics::ReverseProxyHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Request Path: " << request.uri();
   BOOST_LOG_SEV(my_logger::get(), TRACE) << "[Reverse Proxy] root path: " << this->root_path
     << ", location: " << this->uri_prefix
     << ", host: " << this->host_name
@@ -76,13 +77,14 @@ std::unique_ptr<Reply> ReverseProxyHandler::HandleRequest(const Request& request
 
   int status = GetStatus(response);
   reply_ptr->SetStatus(status);
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Response Code: " << std::to_string(status);
 
   // NOTE: it seems like www.ucla.edu is some exception where there will be some random
   // hexadecimal string (e.g. 00637e) at the top of the body, and '0' at the end of it
   // Maybe it is worth hardcoding a fix?
   std::string body = GetBody(response, start);
   reply_ptr->SetBody(body);
-  
+
   std::map<std::string, std::string> m_headers = GetHeaders(response, start);
   reply_ptr = SetHeaders(std::move(reply_ptr), m_headers, request);
 
@@ -205,7 +207,7 @@ void ReverseProxyHandler::RedirectHTMLMaps(std::string& resp) {
 }
 
 boost::asio::ip::tcp::resolver::iterator ReverseProxyHandler::ResolveHost(boost::system::error_code& ec) {
-  boost::asio::io_service io_service;                    
+  boost::asio::io_service io_service;
   boost::asio::ip::tcp::resolver::query query(this->host_name, this->port_name,
     boost::asio::ip::tcp::resolver::query::numeric_service);
   boost::asio::ip::tcp::resolver resolver(io_service);
@@ -218,6 +220,7 @@ std::unique_ptr<Reply> ReverseProxyHandler::ReturnError(std::unique_ptr<Reply> r
   // Internal Server Error
   std::cerr << "Error #" << ec.value() << ": " << ec.message();
   BOOST_LOG_SEV(my_logger::get(), ERROR) << "Error #" << ec.value() << ": " << ec.message();
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Response Code: 500";
   rep->SetStatus(500);
   rep->SetHeader("Content-Type", "text/plain");
   rep->SetBody("500 Internal Server Error\r\n");

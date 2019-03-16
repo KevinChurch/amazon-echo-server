@@ -34,9 +34,8 @@ std::unique_ptr<Database> MemeHandler::InitDatabase() {
 }
 
 std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
-  std::cout << "\nMemeHandler::HandleRequest" << std::endl;
-  BOOST_LOG_SEV(my_logger::get(), INFO) << "\nMemeHandler::HandleRequest";
-  BOOST_LOG_SEV(my_logger::get(), INFO) << "Received URI: " << request.uri();
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "\n::ResponseMetrics::MemeHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Request Path: " << request.uri();
   std::unique_ptr<Reply> reply_ptr(new Reply());
   std::string request_uri = request.uri();
 
@@ -128,11 +127,16 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     }
     else {
       new_meme = createMeme(params["template_id"], top_text, bottom_text);
+      if (new_meme.empty()) {
+        BOOST_LOG_SEV(my_logger::get(), ERROR) << "MemeHandler::HandleRequest - meme creation failure: error with creating a meme";
+        return nullptr;
+      }
     }
 
     // redirect version
     std::string new_location = "/meme/view?id=" + new_meme["meme_id"];
 
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Response Code: 301";
     reply_ptr->SetStatus(301);
     reply_ptr->SetHeader("Location", new_location);
     return reply_ptr;
@@ -214,6 +218,7 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
 
     std::string new_location = "/meme/list";
 
+    BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Response Code: 301";
     reply_ptr->SetStatus(301);
     reply_ptr->SetHeader("Location", new_location);
     return reply_ptr;
@@ -223,6 +228,7 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     return nullptr;
   }
 
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Response Code: 200";
   reply_ptr->SetStatus(200);
   return reply_ptr;
 }
@@ -256,23 +262,33 @@ std::string MemeHandler::newMeme(){
 std::map<std::string, std::string> MemeHandler::createMeme(std::string& template_id,
                                                  std::string& top_text,
                                                  std::string& bottom_text){
+  std::map<std::string, std::string> meme;
   uint32_t uint_template_id = std::atoi(template_id.c_str());
-  uint32_t meme_id = database->AddMeme(uint_template_id, top_text, bottom_text);
-  // TODO: add error handling after Kevin's change is merged
+  int meme_id = database->AddMeme(uint_template_id, top_text, bottom_text);
+  // if database->AddMeme return -1, it means it failed, so return an empty map
+  if (meme_id == -1) {
+    return meme;
+  }
 
-  return viewMeme(meme_id);
+  meme = viewMeme(meme_id);
+  return meme;
 }
 
 std::map<std::string, std::string> MemeHandler::editMeme(std::string& meme_id,
                                                          std::string& template_id,
                                                          std::string& top_text,
                                                          std::string& bottom_text){
+  std::map<std::string, std::string> meme;
   uint32_t uint_meme_id = std::atoi(meme_id.c_str());
   uint32_t uint_template_id = std::atoi(template_id.c_str());
-  uint32_t new_meme_id = database->UpdateMeme(uint_meme_id, uint_template_id, top_text, bottom_text);
-  // TODO: add error handling after Kevin's change is merged
+  int new_meme_id = database->UpdateMeme(uint_meme_id, uint_template_id, top_text, bottom_text);
+  // if database->UpdateMeme return -1, it means it failed, so return an empty map
+  if (new_meme_id == -1) {
+    return meme;
+  }
 
-  return viewMeme(new_meme_id);
+  meme = viewMeme(meme_id);
+  return meme;
 }
 
 /**

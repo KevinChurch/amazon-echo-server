@@ -17,8 +17,8 @@ bool StaticHandler::Init(const NginxConfig& config,
 }
 
 std::unique_ptr<Reply> StaticHandler::HandleRequest(const Request& request) {
-  std::cout << "\nStaticHandler::HandleRequest" << std::endl;
-  BOOST_LOG_SEV(my_logger::get(), INFO) << "\nStaticHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "\n::ResponseMetrics::StaticHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Request Path: " << request.uri();
 
   std::unique_ptr<Reply> reply_ptr(new Reply());
   std::string file_path = GetPath(request.uri());
@@ -40,6 +40,7 @@ std::unique_ptr<Reply> StaticHandler::HandleRequest(const Request& request) {
   }
 
   std::string file_content = GetContent(file);
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Response Code: 200";
   reply_ptr->SetStatus(200);
   reply_ptr->SetHeader("Content-Type", GetContentType(file_path));
   reply_ptr->SetBody(file_content);

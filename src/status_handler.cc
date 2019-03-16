@@ -14,10 +14,11 @@ StatusHandler* StatusHandler::create(const NginxConfig& config,
 }
 
 std::unique_ptr<Reply> StatusHandler::HandleRequest(const Request& request) {
-  std::cout << "\nStatusHandler::HandleRequest" << std::endl;
-  BOOST_LOG_SEV(my_logger::get(), INFO) << "\nStatusHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "\n::ResponseMetrics::StatusHandler::HandleRequest";
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Request Path: " << request.uri();
 
   std::unique_ptr<Reply> reply_ptr(new Reply());
+  BOOST_LOG_SEV(my_logger::get(), INFO) << "::ResponseMetrics:: Response Code: 200";
   reply_ptr->SetStatus(200);
   reply_ptr->SetHeader("Content-Type", "text/plain");
   std::string body_str = "";
