@@ -150,10 +150,15 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
 
     // call viewMeme() with given parameters
     std::map<std::string, std::string> meme_map = viewMeme(params["id"]);
-    HtmlBuilder partialBuilder("./static/memes/partials/_meme.html");
     HtmlBuilder showBuilder("./static/memes/show.html");
-    partialBuilder.inject(meme_map);
-    showBuilder.inject("meme", partialBuilder.getHtml());
+    if (meme_map.empty()) {
+      showBuilder.inject("not-found", "Error: Meme does not exist.");
+    } else {
+      HtmlBuilder partialBuilder("./static/memes/partials/_meme.html");
+      partialBuilder.inject(meme_map);
+      showBuilder.inject("meme", partialBuilder.getHtml());
+    }
+
     reply_ptr->SetBody(showBuilder.getHtml());
     reply_ptr->SetHeader("Content-Type", "text/html");
   }
@@ -314,10 +319,12 @@ std::map<std::string, std::string> MemeHandler::viewMeme(const std::string meme_
   uint32_t meme_id = std::atoi(meme_id_str.c_str());
   Meme meme = database->GetMeme(meme_id);
   std::map<std::string, std::string> meme_map;
-  meme_map["meme_id"] = std::to_string(meme.meme_id);
-  meme_map["template_id"] = std::to_string(meme.template_id);
-  meme_map["top_text"] = meme.top_text;
-  meme_map["bottom_text"] = meme.bottom_text;
+  if (meme.meme_id == meme_id) {
+    meme_map["meme_id"] = std::to_string(meme.meme_id);
+    meme_map["template_id"] = std::to_string(meme.template_id);
+    meme_map["top_text"] = meme.top_text;
+    meme_map["bottom_text"] = meme.bottom_text;
+  }
 
   return meme_map;
 }
