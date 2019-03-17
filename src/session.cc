@@ -92,7 +92,7 @@ int Session::handle_request() {
   //Else Request is invalid, use NotFound Handler
   else{
       std::unique_ptr<Handler> error_ptr(
-					 manager.createByName("not_found", this->config, config.Find("root")));
+					 manager.createByName("bad_request", this->config, config.Find("root")));
       reply_ptr = error_ptr->HandleRequest(*request);
   }
   // putting the request to the request_map

@@ -52,6 +52,7 @@ add_library(handler_lib
   src/echo_handler.cc
   src/static_handler.cc
   src/not_found_handler.cc
+  src/bad_request_handler.cc
   src/status_handler.cc
   src/sleep_handler.cc
   src/reverse_proxy_handler.cc

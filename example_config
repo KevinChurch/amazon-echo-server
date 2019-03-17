@@ -46,6 +46,11 @@ handler not_found {
     name not_found;
 }
 
+handler bad_request {
+    location /;
+    name bad_request;
+}
+
 handler status {
     location /status;
     name status;

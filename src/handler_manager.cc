@@ -39,6 +39,8 @@ std::unique_ptr<Handler> HandlerManager::createByName(
     handler_ptr.reset(StaticHandler::create(config, root_path));
   } else if (name == "not_found") {
     handler_ptr.reset(NotFoundHandler::create(config, root_path));
+  } else if (name == "bad_request") {
+    handler_ptr.reset(BadRequestHandler::create(config, root_path));
   } else if (name == "reverse_proxy") {
     handler_ptr.reset(ReverseProxyHandler::create(config, root_path));
   } else if (name == "sleep") {
