@@ -28,6 +28,39 @@ static int callback_GetAllMemes(void *ptr, int argc, char **argv, char **azColNa
   return 0;
 }
 
+void Database::Refresh(void){
+  sqlite3 *db;
+  char *zErrMsg = 0;
+  int rc;
+
+  /* SQL Statement dropping MEME table */
+  std::string sql_drop = "DROP TABLE IF EXISTS MEMES;";
+
+  /* Open database */
+  rc = sqlite3_open("amazon.db", &db);
+
+  if(rc) {
+    fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+    return;
+  } else {
+    BOOST_LOG_SEV(my_logger::get(), INFO)
+        << "Opened database successfully";
+  }
+
+  /* Execute SQL statement */
+  rc = sqlite3_exec(db, sql_drop.c_str(), nullptr, nullptr, &zErrMsg);
+  if( rc != SQLITE_OK ){
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "SQL error: " << zErrMsg;
+    sqlite3_free(zErrMsg);
+  }else{
+    BOOST_LOG_SEV(my_logger::get(), INFO)
+      <<"Dropped Memes Table!";
+  }
+  sqlite3_close(db);
+  this->Init();
+}
+
 void Database::Init(void){
   sqlite3 *db;
   char *zErrMsg = 0;
@@ -50,7 +83,8 @@ void Database::Init(void){
   rc = sqlite3_open("amazon.db", &db);
 
   if(rc) {
-    fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+    BOOST_LOG_SEV(my_logger::get(), ERROR)
+      << "Can't open database: " << sqlite3_errmsg(db);
     return;
   } else {
     BOOST_LOG_SEV(my_logger::get(), INFO)
@@ -105,7 +139,7 @@ Meme Database::GetMeme(uint32_t id) const{
 
   if(rc) {
     BOOST_LOG_SEV(my_logger::get(), ERROR)
-      << "Can't open database: %s\n" << sqlite3_errmsg(db);
+      << "Can't open database: " << sqlite3_errmsg(db);
     BOOST_LOG_SEV(my_logger::get(), INFO) << meme.toString();
     return meme;
   }

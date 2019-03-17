@@ -12,6 +12,9 @@ class Database {
   //Initialization function to be run on startup
   void Init(void);
 
+  //Refresh function to get a clean table
+  void Refresh(void);
+
   //Search/Get Meme functions
   Meme GetMeme(uint32_t id) const;
   std::vector<Meme> FindMemes(std::string search_string);
