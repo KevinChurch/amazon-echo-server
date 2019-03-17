@@ -101,9 +101,11 @@ file_test() {
     fi
     TEMP_FILE="temp.$EXT"
     curl -s $1 > $TEMP_FILE
-    if cmp -s $TEMP_FILE $2 ; then
+    # if cmp -s $TEMP_FILE $2 ; then
+    if cmp $TEMP_FILE $2 ; then
         echo "pass"
     else
+        diff $TEMP_FILE $2
         echo "fail"
         PASS=0
     fi
@@ -128,12 +130,76 @@ multithreaded_test() {
     fi
 }
 
+reset_database() {
+    echo "deleting database..."
+    rm amazon.db
+}
+
+meme_test() {
+    list_meme_test_empty
+        create_meme "2" "top" "bot"
+    list_meme_test_1
+        create_meme "3" "test" "test"
+    list_meme_test_2
+    search_meme_test_not_found
+    search_meme_test_found
+        delete_meme "2"
+    list_meme_test_1
+}
+
+list_meme_test_empty() {
+    file_test "localhost:8080/meme/list" "tests/html/integration/integration_test_index_empty.html"
+}
+
+list_meme_test_1() {
+    file_test "localhost:8080/meme/list" "tests/html/integration/integration_test_index_1.html"
+}
+
+list_meme_test_2() {
+    file_test "localhost:8080/meme/list" "tests/html/integration/integration_test_index_2.html"
+}
+
+search_meme_test_not_found() {
+    file_test "localhost:8080/meme/list?q=query" "tests/html/integration/integration_test_index_not_found.html"
+}
+
+search_meme_test_found() {
+    file_test "localhost:8080/meme/list?q=top" "tests/html/integration/integration_test_index_found.html"
+}
+
+# Create meme
+# $1 template_id
+# $2 top_text
+# $3 bottom_text
+create_meme() {
+    echo "Creating meme $1"
+    curl -d "template_id=$1&top_text=$2&bottom_text=$3" localhost:8080/meme/create
+}
+
+# Update meme
+# $1 meme_id
+# $2 template_id
+# $3 top_text
+# $4 bottom_text
+update_meme() {
+    echo "Updating meme $1"
+    curl -X PUT -d "update=$1&template_id=$2&top_text=$3&bottom_text=$4" localhost:8080/meme/create
+}
+
+# Delete meme
+# $1 meme_id
+delete_meme() {
+    echo "Deleting meme $1"
+    curl -s localhost:8080/meme/delete?id=$1
+}
+
 
 # TESTS
 
 goto "$TEST_DIR"
 goto ".."
 
+reset_database
 run_server
 
 # Echo Handler
@@ -174,6 +240,8 @@ file_test "localhost:8080/ucla/static/amazon.txt" "static/amazon.txt"
 kill_backend_server
 
 multithreaded_test
+
+meme_test
 
 kill_server
 
