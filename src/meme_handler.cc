@@ -163,18 +163,19 @@ std::unique_ptr<Reply> MemeHandler::HandleRequest(const Request& request) {
     params = GetParams(params_str);
     std::vector<std::map<std::string, std::string>> memes;
 
-    if (params["q"] != "") {
-      memes = findMemes(params["q"]);
-    }
-    else {
-      memes = viewMemes();
-    }
+    std::string query = params["q"];
+
+    memes = query.empty() ? viewMemes() : findMemes(query);
+
+    std::string notFoundText = (!query.empty() && memes.empty()) ? "No results found for <b>" + query + "</b>" : "";
 
     // std::vector<std::map<std::string, std::string>> memes = viewMemes();
     HtmlBuilder partialBuilder("./static/memes/partials/_meme.html");
     HtmlBuilder indexBuilder("./static/memes/index.html");
     partialBuilder.inject(memes);
+    indexBuilder.inject("q", query);
     indexBuilder.inject("memes", partialBuilder.getHtml());
+    indexBuilder.inject("not-found", notFoundText);
     reply_ptr->SetBody(indexBuilder.getHtml());
     reply_ptr->SetHeader("Content-Type", "text/html");
   }
